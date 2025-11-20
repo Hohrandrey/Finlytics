@@ -1,52 +1,67 @@
+import db.database_request.AddCategory
+import db.database_request.DeleteCategory
+import java.sql.SQLException
 
 fun main() {
-    println("=== FINLYTICS - УПРАВЛЕНИЕ КАТЕГОРИЯМИ ===")
+    try {
+        println("FINLYTICS")
 
-    // Автоматическое добавление стандартных категорий при запуске
-    println("Инициализация стандартных категорий...")
-    AddCategory.addDefaultCategories()
+        // Интерактивный режим для ручного управления
+        interactiveMenu()
 
-    // Добавление дополнительных категорий
-    println("\nДобавление дополнительных категорий...")
-    AddCategory.addExpensesCategory("Рестораны")
-    AddCategory.addExpensesCategory("Путешествия")
-    AddCategory.addIncomeCategory("Аренда")
-    AddCategory.addIncomeCategory("Бизнес")
+    } catch (e: SQLException) {
+        println("❌ Критическая ошибка базы данных: ${e.message}")
+        println("Проверьте наличие файла базы данных и права доступа.")
+    } catch (e: Exception) {
+        println("❌ Неожиданная ошибка: ${e.message}")
+        e.printStackTrace()
+    }
+}
 
-    // Показать все добавленные категории
-    println("\nТекущие категории в системе:")
-    DeleteCategory.showAllCategories()
-
-    // Интерактивный режим для ручного управления
+fun interactiveMenu() {
     while (true) {
-        println("\n=== ГЛАВНОЕ МЕНЮ ===")
-        println("1. Добавить категорию")
-        println("2. Удалить категорию")
-        println("3. Показать все категории")
-        println("4. Добавить стандартные категории")
-        println("0. Выход")
+        try {
+            println("\n=== ГЛАВНОЕ МЕНЮ ===")
+            println("1. Добавить категорию")
+            println("2. Удалить категорию")
+            println("3. Показать все категории")
+            println("0. Выход")
 
-        print("Выберите действие: ")
-        val choice = readLine()?.trim()
+            print("Выберите действие: ")
+            val choice = readLine()?.trim()
 
-        when (choice) {
-            "1" -> {
-                AddCategory.addCategoryInteractive()
+            when (choice) {
+                "1" -> {
+                    try {
+                        AddCategory.addCategoryInteractive()
+                    } catch (e: Exception) {
+                        println("Ошибка при добавлении категории: ${e.message}")
+                    }
+                }
+                "2" -> {
+                    try {
+                        DeleteCategory.deleteCategoryInteractive()
+                    } catch (e: Exception) {
+                        println("Ошибка при удалении категории: ${e.message}")
+                    }
+                }
+                "3" -> {
+                    try {
+                        if (!DeleteCategory.showAllCategories()) {
+                            println("Не удалось загрузить список категорий")
+                        }
+                    } catch (e: Exception) {
+                        println("Ошибка при отображении категорий: ${e.message}")
+                    }
+                }
+                "0" -> {
+                    println("Выход из программы...")
+                    break
+                }
+                else -> println("Неверный выбор, попробуйте снова")
             }
-            "2" -> {
-                DeleteCategory.deleteCategoryInteractive()
-            }
-            "3" -> {
-                DeleteCategory.showAllCategories()
-            }
-            "4" -> {
-                AddCategory.addDefaultCategories()
-            }
-            "0" -> {
-                println("Выход из программы...")
-                break
-            }
-            else -> println("❌ Неверный выбор, попробуйте снова")
+        } catch (e: Exception) {
+            println("Ошибка в меню: ${e.message}")
         }
     }
 }
