@@ -24,10 +24,10 @@ class DeleteCategory {
                         val affectedRows = pstmt.executeUpdate()
 
                         if (affectedRows > 0) {
-                            println("✅ Категория расходов с ID $categoryId успешно удалена!")
+                            println("Категория расходов с ID $categoryId успешно удалена!")
                             true
                         } else {
-                            println("❌ Категория расходов с ID $categoryId не найдена")
+                            println("Категория расходов с ID $categoryId не найдена")
                             false
                         }
                     }
@@ -68,10 +68,10 @@ class DeleteCategory {
                         val affectedRows = pstmt.executeUpdate()
 
                         if (affectedRows > 0) {
-                            println("✅ Категория расходов '$categoryName' успешно удалена!")
+                            println("Категория расходов '$categoryName' успешно удалена!")
                             true
                         } else {
-                            println("❌ Категория расходов '$categoryName' не найдена")
+                            println("Категория расходов '$categoryName' не найдена")
                             false
                         }
                     }
@@ -112,10 +112,10 @@ class DeleteCategory {
                         val affectedRows = pstmt.executeUpdate()
 
                         if (affectedRows > 0) {
-                            println("✅ Категория доходов с ID $categoryId успешно удалена!")
+                            println("Категория доходов с ID $categoryId успешно удалена!")
                             true
                         } else {
-                            println("❌ Категория доходов с ID $categoryId не найдена")
+                            println("Категория доходов с ID $categoryId не найдена")
                             false
                         }
                     }
@@ -156,10 +156,10 @@ class DeleteCategory {
                         val affectedRows = pstmt.executeUpdate()
 
                         if (affectedRows > 0) {
-                            println("✅ Категория доходов '$categoryName' успешно удалена!")
+                            println("Категория доходов '$categoryName' успешно удалена!")
                             true
                         } else {
-                            println("❌ Категория доходов '$categoryName' не найдена")
+                            println("Категория доходов '$categoryName' не найдена")
                             false
                         }
                     }
@@ -276,76 +276,74 @@ class DeleteCategory {
             return success1 && success2
         }
 
-        // Интерактивное удаление категории
-        fun deleteCategoryInteractive() {
+        // Интерактивное удаление категории доходов
+        fun deleteIncomeCategoryInteractive() {
             try {
-                println("=== УДАЛЕНИЕ КАТЕГОРИИ ===")
+                println("=== УДАЛЕНИЕ КАТЕГОРИИ ДОХОДОВ ===")
+                if (showIncomeCategories()) {
+                    print("Выберите способ удаления (1 - по ID, 2 - по названию): ")
+                    val methodChoice = readLine()?.trim()
 
-                print("Выберите тип категории (1 - расходы, 2 - доходы): ")
-                val typeChoice = readLine()?.trim()
+                    when (methodChoice) {
+                        "1" -> {
+                            print("Введите ID категории доходов для удаления: ")
+                            val idInput = readLine()?.trim()?.toIntOrNull()
 
-                when (typeChoice) {
-                    "1" -> {
-                        if (showExpensesCategories()) {
-                            print("Выберите способ удаления (1 - по ID, 2 - по названию): ")
-                            val methodChoice = readLine()?.trim()
-
-                            when (methodChoice) {
-                                "1" -> {
-                                    print("Введите ID категории расходов для удаления: ")
-                                    val idInput = readLine()?.trim()?.toIntOrNull()
-
-                                    if (idInput != null && idInput > 0) {
-                                        deleteExpensesCategory(idInput)
-                                    } else {
-                                        println("Неверный формат ID")
-                                    }
-                                }
-                                "2" -> {
-                                    print("Введите название категории расходов для удаления: ")
-                                    val name = readLine()?.trim()
-
-                                    if (!name.isNullOrEmpty()) {
-                                        deleteExpensesCategoryByName(name)
-                                    } else {
-                                        println("Название категории не может быть пустым")
-                                    }
-                                }
-                                else -> println("Неверный выбор метода")
+                            if (idInput != null && idInput > 0) {
+                                deleteIncomeCategory(idInput)
+                            } else {
+                                println("Неверный формат ID")
                             }
                         }
-                    }
-                    "2" -> {
-                        if (showIncomeCategories()) {
-                            print("Выберите способ удаления (1 - по ID, 2 - по названию): ")
-                            val methodChoice = readLine()?.trim()
+                        "2" -> {
+                            print("Введите название категории доходов для удаления: ")
+                            val name = readLine()?.trim()
 
-                            when (methodChoice) {
-                                "1" -> {
-                                    print("Введите ID категории доходов для удаления: ")
-                                    val idInput = readLine()?.trim()?.toIntOrNull()
-
-                                    if (idInput != null && idInput > 0) {
-                                        deleteIncomeCategory(idInput)
-                                    } else {
-                                        println("Неверный формат ID")
-                                    }
-                                }
-                                "2" -> {
-                                    print("Введите название категории доходов для удаления: ")
-                                    val name = readLine()?.trim()
-
-                                    if (!name.isNullOrEmpty()) {
-                                        deleteIncomeCategoryByName(name)
-                                    } else {
-                                        println("Название категории не может быть пустым")
-                                    }
-                                }
-                                else -> println("Неверный выбор метода")
+                            if (!name.isNullOrEmpty()) {
+                                deleteIncomeCategoryByName(name)
+                            } else {
+                                println("Название категории не может быть пустым")
                             }
                         }
+                        else -> println("Неверный выбор метода")
                     }
-                    else -> println("Неверный выбор типа категории")
+                }
+            } catch (e: Exception) {
+                println("Ошибка ввода: ${e.message}")
+            }
+        }
+
+        // Интерактивное удаление категории расходов
+        fun deleteExpensesCategoryInteractive() {
+            try {
+                println("=== УДАЛЕНИЕ КАТЕГОРИИ РАСХОДОВ ===")
+                if (showExpensesCategories()) {
+                    print("Выберите способ удаления (1 - по ID, 2 - по названию): ")
+                    val methodChoice = readLine()?.trim()
+
+                    when (methodChoice) {
+                        "1" -> {
+                            print("Введите ID категории расходов для удаления: ")
+                            val idInput = readLine()?.trim()?.toIntOrNull()
+
+                            if (idInput != null && idInput > 0) {
+                                deleteExpensesCategory(idInput)
+                            } else {
+                                println("Неверный формат ID")
+                            }
+                        }
+                        "2" -> {
+                            print("Введите название категории расходов для удаления: ")
+                            val name = readLine()?.trim()
+
+                            if (!name.isNullOrEmpty()) {
+                                deleteExpensesCategoryByName(name)
+                            } else {
+                                println("Название категории не может быть пустым")
+                            }
+                        }
+                        else -> println("Неверный выбор метода")
+                    }
                 }
             } catch (e: Exception) {
                 println("Ошибка ввода: ${e.message}")

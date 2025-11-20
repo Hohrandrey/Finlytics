@@ -24,10 +24,10 @@ class AddCategory {
                         val affectedRows = pstmt.executeUpdate()
 
                         if (affectedRows > 0) {
-                            println("✅ Категория расходов '$categoryName' успешно добавлена!")
+                            println("Категория расходов '$categoryName' успешно добавлена!")
                             true
                         } else {
-                            println("❌ Ошибка при добавлении категории расходов")
+                            println("Ошибка при добавлении категории расходов")
                             false
                         }
                     }
@@ -68,10 +68,10 @@ class AddCategory {
                         val affectedRows = pstmt.executeUpdate()
 
                         if (affectedRows > 0) {
-                            println("✅ Категория доходов '$categoryName' успешно добавлена!")
+                            println("Категория доходов '$categoryName' успешно добавлена!")
                             true
                         } else {
-                            println("❌ Ошибка при добавлении категории доходов")
+                            println("Ошибка при добавлении категории доходов")
                             false
                         }
                     }
@@ -95,36 +95,34 @@ class AddCategory {
             }
         }
 
-        // Интерактивное добавление категории
-        fun addCategoryInteractive() {
+        // Интерактивное добавление категории доходов
+        fun addIncomeCategoryInteractive() {
             try {
-                println("=== ДОБАВЛЕНИЕ НОВОЙ КАТЕГОРИИ ===")
+                println("=== ДОБАВЛЕНИЕ КАТЕГОРИИ ДОХОДОВ ===")
+                print("Введите название категории доходов: ")
+                val name = readLine()?.trim()
 
-                print("Выберите тип категории (1 - расходы, 2 - доходы): ")
-                val typeChoice = readLine()?.trim()
+                if (!name.isNullOrEmpty()) {
+                    addIncomeCategory(name)
+                } else {
+                    println("Название категории не может быть пустым")
+                }
+            } catch (e: Exception) {
+                println("Ошибка ввода: ${e.message}")
+            }
+        }
 
-                when (typeChoice) {
-                    "1" -> {
-                        print("Введите название категории расходов: ")
-                        val name = readLine()?.trim()
+        // Интерактивное добавление категории расходов
+        fun addExpensesCategoryInteractive() {
+            try {
+                println("=== ДОБАВЛЕНИЕ КАТЕГОРИИ РАСХОДОВ ===")
+                print("Введите название категории расходов: ")
+                val name = readLine()?.trim()
 
-                        if (!name.isNullOrEmpty()) {
-                            addExpensesCategory(name)
-                        } else {
-                            println("Название категории не может быть пустым")
-                        }
-                    }
-                    "2" -> {
-                        print("Введите название категории доходов: ")
-                        val name = readLine()?.trim()
-
-                        if (!name.isNullOrEmpty()) {
-                            addIncomeCategory(name)
-                        } else {
-                            println("Название категории не может быть пустым")
-                        }
-                    }
-                    else -> println("Неверный выбор типа категории")
+                if (!name.isNullOrEmpty()) {
+                    addExpensesCategory(name)
+                } else {
+                    println("Название категории не может быть пустым")
                 }
             } catch (e: Exception) {
                 println("Ошибка ввода: ${e.message}")
