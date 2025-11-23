@@ -48,9 +48,9 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         refresh() // пока просто обновляем всё
     }
 
-    fun showAddOperation() = _state.value = _state.value.copy(showOperationDialog = true)
-    fun showEditOperation(op: Operation) = _state.value = _state.value.copy(showOperationDialog = true, editingOperation = op)
-    fun hideOperationDialog() = _state.value = _state.value.copy(showOperationDialog = false, editingOperation = null)
+    fun showAddOperation() = _state.value.copy(showOperationDialog = true)
+    fun showEditOperation(op: Operation) = _state.value.copy(showOperationDialog = true, editingOperation = op)
+    fun hideOperationDialog() = _state.value.copy(showOperationDialog = false, editingOperation = null)
 
     fun saveOperation(op: Operation) {
         if (op.id == 0) repo.addOperation(op) else repo.updateOperation(op)
@@ -63,8 +63,8 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         refresh()
     }
 
-    fun showAddCategory(isIncome: Boolean) = _state.value = _state.value.copy(showCategoryDialog = true, isIncomeCategory = isIncome)
-    fun hideCategoryDialog() = _state.value = _state.value.copy(showCategoryDialog = false)
+    fun showAddCategory(isIncome: Boolean) = _state.value.copy(showCategoryDialog = true, isIncomeCategory = isIncome)
+    fun hideCategoryDialog() = _state.value.copy(showCategoryDialog = false)
 
     fun saveCategory(name: String) {
         repo.addCategory(name, _state.value.isIncomeCategory)
