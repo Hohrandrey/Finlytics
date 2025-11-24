@@ -7,6 +7,5 @@ data class Operation(
     val type: String,
     val amount: Double,
     val category: String,
-    val date: LocalDate,
-    val name: String? = null
+    val date: LocalDate
 )
