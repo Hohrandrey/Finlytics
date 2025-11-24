@@ -1,0 +1,26 @@
+package db.database_request
+
+import java.sql.DriverManager
+
+object GetIncomeCategories {
+    private const val DB_URL = "jdbc:sqlite:src/main/kotlin/db/database/Finlytics.db"
+
+    fun getAll(): List<Pair<Int, String>> {
+        val list = mutableListOf<Pair<Int, String>>()
+        val sql = "SELECT id_income_category, income_category_name FROM Income_categories ORDER BY income_category_name"
+        try {
+            DriverManager.getConnection(DB_URL).use { conn ->
+                conn.createStatement().use { stmt ->
+                    val rs = stmt.executeQuery(sql)
+                    while (rs.next()) {
+                        list.add(rs.getInt(1) to rs.getString(2))
+                    }
+                }
+            }
+        } catch (e: Exception) { }
+        return list
+    }
+
+    fun getAllNames() = getAll().map { it.second }
+    fun getIdByName(name: String) = getAll().find { it.second == name }?.first
+}
