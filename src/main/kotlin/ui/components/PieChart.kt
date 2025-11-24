@@ -1,4 +1,4 @@
-package ui.components
+/*package ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
@@ -44,4 +44,4 @@ fun PieChart(data: Map<String, Double>, modifier: Modifier = Modifier) {
             startAngle += sweep
         }
     }
-}
+}*/

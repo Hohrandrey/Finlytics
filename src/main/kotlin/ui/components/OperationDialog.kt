@@ -47,12 +47,12 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                DropdownMenuBox(
+                /*DropdownMenuBox(
                     value = category,
                     onValueChange = { category = it },
                     label = "Категория",
                     items = categories
-                )
+                )*/
 
                 DatePicker(
                     date = date,

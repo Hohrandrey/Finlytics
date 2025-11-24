@@ -9,7 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ui.components.FilterSelector
-import ui.components.PieChart
+//import ui.components.PieChart
 import viewmodel.FinanceViewModel
 
 @Composable
@@ -57,9 +57,9 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
         Text("Расходы по категориям", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(16.dp))
-        Box(modifier = Modifier.size(280.dp).align(Alignment.CenterHorizontally)) {
+        /*Box(modifier = Modifier.size(280.dp).align(Alignment.CenterHorizontally)) {
             PieChart(state.expensesByCategory)
-        }
+        }*/
 
         Spacer(Modifier.height(32.dp))
 
