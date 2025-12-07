@@ -22,7 +22,7 @@ class FinanceRepository {
      * @return Отсортированный по дате список всех операций
      */
     fun getAllOperations(): List<Operation> {
-        println("Получение всех операций...")
+        println("\n=== REPOSITORY: ПОЛУЧЕНИЕ ВСЕХ ОПЕРАЦИЙ ===")
 
         // Получаем операции доходов и преобразуем в модель Operation
         val income = GetIncomeTransactions.getAll().map { row ->
@@ -46,9 +46,21 @@ class FinanceRepository {
             )
         }
 
+        // Подробная отладка
+        println("Доходы получены: ${income.size} операций")
+        println("Расходы получены: ${expenses.size} операций")
+
+        if (income.isNotEmpty()) {
+            println("Последняя операция дохода: ${income.first()}")
+        }
+        if (expenses.isNotEmpty()) {
+            println("Последняя операция расхода: ${expenses.first()}")
+        }
+
         // Соединяем и сортируем по дате (сначала новые)
         val allOps = (income + expenses).sortedByDescending { it.date }
         println("Загружено операций: доходов=${income.size}, расходов=${expenses.size}, всего=${allOps.size}")
+        println("===============================================\n")
         return allOps
     }
 
@@ -73,7 +85,14 @@ class FinanceRepository {
      * @throws RuntimeException Если не удалось добавить операцию
      */
     fun addOperation(op: Operation): Operation {
-        println("Добавление операции: $op")
+        println("\n=== ДОБАВЛЕНИЕ ОПЕРАЦИИ ===")
+        println("Операция: $op")
+        println("Тип операции: ${op.type}")
+        println("Категория: ${op.category}")
+        println("Сумма: ${op.amount}")
+        println("Дата: ${op.date}")
+        println("================================\n")
+
         return if (op.type == "Доход") {
             // Получаем ID категории доходов
             val catId = GetIncomeCategories.getIdByName(op.category)

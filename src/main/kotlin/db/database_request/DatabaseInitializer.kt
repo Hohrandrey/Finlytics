@@ -54,23 +54,39 @@ object DatabaseInitializer {
 
         try {
             DriverManager.getConnection(DB_URL).use { conn ->
-                println("Подключение к БД успешно")
+                println("\n=== DATABASE INITIALIZATION ===")
+                println("Подключение к БД успешно: $DB_URL")
+
+                // Проверяем существующие таблицы
+                val metaData = conn.metaData
+                val tables = metaData.getTables(null, null, "%", null)
+                println("Существующие таблицы в БД:")
+                while (tables.next()) {
+                    println("  - ${tables.getString("TABLE_NAME")}")
+                }
+                tables.close()
+
                 conn.createStatement().use { stmt ->
                     // Выполняем каждый запрос отдельно (разделены точкой с запятой)
                     sql.split(";").forEach { query ->
                         if (query.trim().isNotEmpty()) {
                             stmt.execute(query.trim())
+                            println("Выполнен запрос: ${query.trim().take(50)}...")
                         }
                     }
                 }
                 println("Таблицы созданы/проверены успешно")
+                println("===============================\n")
 
                 // Добавляем категории по умолчанию
                 DefaultCategories.initializeDefaultCategories()
             }
         } catch (e: Exception) {
-            println("Ошибка инициализации БД: ${e.message}")
+            println("\n!!! ОШИБКА ИНИЦИАЛИЗАЦИИ БД !!!")
+            println("Сообщение: ${e.message}")
+            println("Трассировка:")
             e.printStackTrace()
+            println("=================================\n")
         }
     }
 }

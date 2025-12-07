@@ -27,9 +27,12 @@ import androidx.compose.runtime.LaunchedEffect
 fun OperationDialog(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
 
-    // Отладочная информация
+    // Отладочная информация о редактируемой операции
     LaunchedEffect(viewModel.editingOperation) {
-        println("OperationDialog: editingOperation = ${viewModel.editingOperation}")
+        println("\n=== OPERATION DIALOG ===")
+        println("Режим: ${if (viewModel.editingOperation == null) "Добавление" else "Редактирование"}")
+        println("Операция для редактирования: ${viewModel.editingOperation}")
+        println("=========================\n")
     }
 
     var type by remember { mutableStateOf(viewModel.editingOperation?.type ?: "Расход") }
@@ -42,7 +45,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
 
     val categories = if (type == "Доход") state.incomeCategories else state.expenseCategories
 
-    // Преобразуем текст в LocalDate с обработкой ошибок
+    // Преобразуем текст в LocalDate
     val selectedDate = remember(dateText) {
         try {
             LocalDate.parse(dateText)

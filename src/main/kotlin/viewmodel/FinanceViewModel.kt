@@ -8,12 +8,20 @@ import models.Operation
 import repository.FinanceRepository
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
+import kotlin.math.roundToInt
+import kotlin.math.pow
 
 /**
  * ViewModel для управления состоянием приложения и бизнес-логикой.
  * Следует архитектуре MVVM, обеспечивает реактивное обновление UI.
  */
 class FinanceViewModel(private val repo: FinanceRepository) {
+    // Создаем DecimalFormat с явным указанием локали для корректного парсинга
+    private val decimalFormat = DecimalFormat("#.##", DecimalFormatSymbols(Locale.US))
+
     // Хранит текущее состояние приложения
     private val _state = MutableStateFlow(FinanceState())
     val state: StateFlow<FinanceState> = _state.asStateFlow()
@@ -53,15 +61,29 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         val expenseOperations = operations.filter { it.type == "Расход" }
         val expByCat = expenseOperations
             .groupBy { it.category }
-            .mapValues { it.value.sumOf { op -> op.amount } }
+            .mapValues { entry ->
+                val sum = entry.value.sumOf { op -> op.amount }
+                sum
+            }
 
-        // Отладочная информация
-        println("Статистика расчет:")
-        println("  Всего операций: ${operations.size}")
-        println("  Операций доходов: ${operations.count { it.type == "Доход" }}")
-        println("  Операций расходов: ${expenseOperations.size}")
-        println("  Категории расходов: ${expByCat.keys}")
-        println("  Суммы по категориям: $expByCat")
+        // Подробная отладочная информация
+        println("\n=== CALCULATE STATISTICS ===")
+        println("Всего операций: ${operations.size}")
+        println("Операций доходов: ${operations.count { it.type == "Доход" }}")
+        println("Операций расходов: ${expenseOperations.size}")
+        println("Общая сумма доходов: $income руб.")
+        println("Общая сумма расходов: $expenses руб.")
+        println("Баланс: ${income - expenses} руб.")
+
+        if (expByCat.isNotEmpty()) {
+            println("Детализация расходов по категориям:")
+            expByCat.forEach { (category, amount) ->
+                println("  - $category: $amount руб.")
+            }
+        } else {
+            println("Расходы по категориям: нет данных")
+        }
+        println("============================\n")
 
         _state.value = _state.value.copy(
             operations = operations,
@@ -271,4 +293,12 @@ class FinanceViewModel(private val repo: FinanceRepository) {
             e.printStackTrace()
         }
     }
+
+    private fun Double.roundTo(decimals: Int): Double {
+        val multiplier = 10.0.pow(decimals)
+        return (this * multiplier).roundToInt() / multiplier
+    }
 }
+
+// Добавляем функцию roundToDouble как extension
+fun Double.roundToDouble(): Double = kotlin.math.round(this)

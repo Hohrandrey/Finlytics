@@ -28,9 +28,14 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
     // Отладочная информация о данных для диаграммы
     LaunchedEffect(state.expensesByCategory) {
-        println("OverviewScreen: expensesByCategory = ${state.expensesByCategory}")
-        println("  Размер данных: ${state.expensesByCategory.size}")
-        println("  Всего расходов: ${state.totalExpenses}")
+        println("\n=== OVERVIEW SCREEN ===")
+        println("Текущий баланс: ${state.balance} руб.")
+        println("Общие доходы: ${state.totalIncome} руб.")
+        println("Общие расходы: ${state.totalExpenses} руб.")
+        println("Количество операций: ${state.operations.size}")
+        println("Категорий расходов для диаграммы: ${state.expensesByCategory.size}")
+        println("Данные для диаграммы: ${state.expensesByCategory}")
+        println("========================\n")
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -86,17 +91,29 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
             Spacer(Modifier.height(24.dp))
 
-            Text("Расходы по категориям", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                "Расходы по категориям",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colors.onSurface  // Явно указываем цвет текста
+            )
             Spacer(Modifier.height(16.dp))
 
             // Диаграмма распределения расходов
-            PieChart(
-                state.expensesByCategory,
+            Card(
+                backgroundColor = MaterialTheme.colors.surface,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
-                    .padding(horizontal = 16.dp)
-            )
+                    .height(250.dp),
+                elevation = 4.dp
+            ) {
+                PieChart(
+                    state.expensesByCategory,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                )
+            }
 
             Spacer(Modifier.height(24.dp))
 

@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import ui.components.NavigationBar
 import viewmodel.FinanceViewModel
+import androidx.compose.runtime.LaunchedEffect
 
 /**
  * Экран "Настройки" - управление категориями доходов и расходов.
@@ -25,6 +26,16 @@ import viewmodel.FinanceViewModel
 @Composable
 fun SettingsScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
+
+    // Отладочная информация о категориях
+    LaunchedEffect(state.incomeCategories, state.expenseCategories) {
+        println("\n=== SETTINGS SCREEN ===")
+        println("Категорий доходов: ${state.incomeCategories.size}")
+        println("Категорий расходов: ${state.expenseCategories.size}")
+        println("Список категорий доходов: ${state.incomeCategories}")
+        println("Список категорий расходов: ${state.expenseCategories}")
+        println("========================\n")
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         NavigationBar(viewModel)

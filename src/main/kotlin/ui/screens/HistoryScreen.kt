@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import models.Operation
+import androidx.compose.runtime.LaunchedEffect
 
 /**
  * Экран "История" - отображает список всех финансовых операций.
@@ -31,6 +32,20 @@ import models.Operation
 @Composable
 fun HistoryScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
+
+    // Отладочная информация об операциях
+    LaunchedEffect(state.operations) {
+        println("\n=== HISTORY SCREEN ===")
+        println("Всего операций: ${state.operations.size}")
+        println("Операций доходов: ${state.operations.count { it.type == "Доход" }}")
+        println("Операций расходов: ${state.operations.count { it.type == "Расход" }}")
+        println("Последние 3 операции:")
+        state.operations.take(3).forEach { op ->
+            println("  - ${op.type}: ${op.category} - ${op.amount} руб. (${op.date})")
+        }
+        println("======================\n")
+    }
+
     // Форматтер для отображения даты в удобном формате
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
