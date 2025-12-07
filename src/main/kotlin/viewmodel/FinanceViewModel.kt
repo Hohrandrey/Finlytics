@@ -50,9 +50,18 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         val expenses = operations.filter { it.type == "Расход" }.sumOf { it.amount }
 
         // Группируем расходы по категориям для диаграммы
-        val expByCat = operations.filter { it.type == "Расход" }
+        val expenseOperations = operations.filter { it.type == "Расход" }
+        val expByCat = expenseOperations
             .groupBy { it.category }
             .mapValues { it.value.sumOf { op -> op.amount } }
+
+        // Отладочная информация
+        println("Статистика расчет:")
+        println("  Всего операций: ${operations.size}")
+        println("  Операций доходов: ${operations.count { it.type == "Доход" }}")
+        println("  Операций расходов: ${expenseOperations.size}")
+        println("  Категории расходов: ${expByCat.keys}")
+        println("  Суммы по категориям: $expByCat")
 
         _state.value = _state.value.copy(
             operations = operations,

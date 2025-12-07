@@ -15,6 +15,7 @@ import java.time.format.DateTimeParseException
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.runtime.LaunchedEffect
 
 /**
  * Диалоговое окно для добавления или редактирования финансовой операции.
@@ -25,6 +26,11 @@ import androidx.compose.ui.text.style.TextOverflow
 @Composable
 fun OperationDialog(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
+
+    // Отладочная информация
+    LaunchedEffect(viewModel.editingOperation) {
+        println("OperationDialog: editingOperation = ${viewModel.editingOperation}")
+    }
 
     var type by remember { mutableStateOf(viewModel.editingOperation?.type ?: "Расход") }
     var amount by remember { mutableStateOf(viewModel.editingOperation?.amount?.toString() ?: "") }

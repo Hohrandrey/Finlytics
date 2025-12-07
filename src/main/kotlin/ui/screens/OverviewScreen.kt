@@ -14,6 +14,7 @@ import ui.components.FilterSelector
 import ui.components.NavigationBar
 import ui.components.PieChart
 import viewmodel.FinanceViewModel
+import androidx.compose.runtime.LaunchedEffect
 
 /**
  * Экран "Обзор" - главный экран приложения, отображающий сводку финансов.
@@ -24,6 +25,13 @@ import viewmodel.FinanceViewModel
 @Composable
 fun OverviewScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
+
+    // Отладочная информация о данных для диаграммы
+    LaunchedEffect(state.expensesByCategory) {
+        println("OverviewScreen: expensesByCategory = ${state.expensesByCategory}")
+        println("  Размер данных: ${state.expensesByCategory.size}")
+        println("  Всего расходов: ${state.totalExpenses}")
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         NavigationBar(viewModel)
@@ -40,7 +48,6 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
             Spacer(Modifier.height(24.dp))
 
-            // Компонент для выбора периода фильтрации
             FilterSelector(viewModel)
 
             Spacer(Modifier.height(24.dp))
@@ -48,7 +55,8 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
             // Карточка с балансом и статистикой
             Card(
                 backgroundColor = MaterialTheme.colors.surface,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                elevation = 4.dp
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Баланс", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -60,12 +68,18 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                         else MaterialTheme.colors.error
                     )
                     Spacer(Modifier.height(8.dp))
-                    Row {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text(
                             "Доходы: ${String.format("%.2f", state.totalIncome)} ₽",
-                            modifier = Modifier.weight(1f)
+                            color = MaterialTheme.colors.secondary
                         )
-                        Text("Расходы: ${String.format("%.2f", state.totalExpenses)} ₽")
+                        Text(
+                            "Расходы: ${String.format("%.2f", state.totalExpenses)} ₽",
+                            color = MaterialTheme.colors.error
+                        )
                     }
                 }
             }
@@ -80,20 +94,20 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                 state.expensesByCategory,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(250.dp)
                     .padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.height(24.dp))
 
-            // Кнопка для добавления новой операции
             Button(
                 onClick = { viewModel.showAddOperation() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
             ) {
-                Text("Добавить операцию", fontSize = 16.sp)
+                Text("Добавить операцию", fontSize = 16.sp, color = MaterialTheme.colors.onPrimary)
             }
         }
     }
