@@ -22,10 +22,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 
 dependencies {
     implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
-
     implementation("org.xerial:sqlite-jdbc:3.46.1.0")
-
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.1")
 }
 

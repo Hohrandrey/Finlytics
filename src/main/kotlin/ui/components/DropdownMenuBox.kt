@@ -1,11 +1,10 @@
-/*package ui.components
+package ui.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun DropdownMenuBox(
@@ -17,35 +16,46 @@ fun DropdownMenuBox(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = {},
-            label = { Text(label) },
-            readOnly = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.fillMaxWidth()
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            items.forEach { item ->
-                DropdownMenuItem(onClick = {
-                    onValueChange(item)
-                    expanded = false
-                }) {
-                    Text(item)
+            Text(label)
+            Button(
+                onClick = { expanded = !expanded }
+            ) {
+                Text(value.ifEmpty { "Выберите категорию" })
+            }
+        }
+
+        if (expanded) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = 4.dp
+            ) {
+                Column {
+                    if (items.isEmpty()) {
+                        Text(
+                            "Нет категорий",
+                            style = MaterialTheme.typography.caption,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    } else {
+                        items.forEach { item ->
+                            Button(
+                                onClick = {
+                                    onValueChange(item)
+                                    expanded = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(item)
+                            }
+                        }
+                    }
                 }
             }
         }
-        // Клик по полю открывает меню
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .padding(8.dp)
-        ) { /* кликабельная зона */ }
-            .clickable { expanded = true }
     }
-}*/
+}
