@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import viewmodel.FinanceViewModel
 
@@ -55,15 +56,20 @@ fun NavigationButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = Modifier.width(100.dp),
+        modifier = Modifier
+            .widthIn(min = 120.dp)
+            .height(48.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = if (isSelected) MaterialTheme.colors.primary
             else MaterialTheme.colors.surface
-        )
+        ),
+        contentPadding = PaddingValues(horizontal = 8.dp)
     ) {
         Text(
             text = text,
-            color = if (isSelected) Color.White else MaterialTheme.colors.onSurface
+            color = if (isSelected) Color.White else MaterialTheme.colors.onSurface,
+            textAlign = TextAlign.Center,
+            maxLines = 1
         )
     }
 }
