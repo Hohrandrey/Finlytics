@@ -8,6 +8,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import viewmodel.FinanceViewModel
 
+/**
+ * Компонент для выбора периода фильтрации данных.
+ * Отображает ряд кнопок с различными временными интервалами.
+ *
+ * @param viewModel ViewModel для применения фильтра
+ */
 @Composable
 fun FilterSelector(viewModel: FinanceViewModel) {
     Row(

@@ -3,17 +3,28 @@ package db.database_request
 import java.sql.DriverManager
 import java.io.File
 
+/**
+ * Инициализатор базы данных. Создает таблицы при первом запуске приложения.
+ * Добавляет категории по умолчанию.
+ */
 object DatabaseInitializer {
+    // Используем конфигурацию для получения пути к БД
     private val DB_URL = DatabaseConfig.DB_URL
 
     init {
+        // Создаем директорию для базы данных, если ее нет
         val dbFile = File("src/main/kotlin/db/database/Finlytics.db")
         dbFile.parentFile.mkdirs()
         println("Путь к БД: ${dbFile.absolutePath}")
         println("БД существует: ${dbFile.exists()}")
     }
 
+    /**
+     * Создает все необходимые таблицы в базе данных, если они не существуют.
+     * Выполняется при каждом запуске приложения для обеспечения целостности схемы БД.
+     */
     fun createTablesIfNotExist() {
+        // SQL-запросы для создания таблиц
         val sql = """
             CREATE TABLE IF NOT EXISTS Income_categories (
                 id_income_category INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,6 +56,7 @@ object DatabaseInitializer {
             DriverManager.getConnection(DB_URL).use { conn ->
                 println("Подключение к БД успешно")
                 conn.createStatement().use { stmt ->
+                    // Выполняем каждый запрос отдельно (разделены точкой с запятой)
                     sql.split(";").forEach { query ->
                         if (query.trim().isNotEmpty()) {
                             stmt.execute(query.trim())
@@ -53,6 +65,7 @@ object DatabaseInitializer {
                 }
                 println("Таблицы созданы/проверены успешно")
 
+                // Добавляем категории по умолчанию
                 DefaultCategories.initializeDefaultCategories()
             }
         } catch (e: Exception) {

@@ -2,9 +2,22 @@ package db.database_request
 
 import java.sql.DriverManager
 
+/**
+ * Объект для получения транзакций расходов из базы данных.
+ * Выполняет JOIN с таблицей категорий для получения полной информации.
+ */
 object GetExpensesTransactions {
     private val DB_URL = DatabaseConfig.DB_URL
 
+    /**
+     * Модель строки результата запроса транзакций расходов.
+     *
+     * @property id Уникальный идентификатор транзакции
+     * @property name Название транзакции (может быть null)
+     * @property amount Сумма транзакции
+     * @property date Дата транзакции в формате строки
+     * @property category Название категории транзакции
+     */
     data class Row(
         val id: Int,
         val name: String?,
@@ -13,6 +26,12 @@ object GetExpensesTransactions {
         val category: String
     )
 
+    /**
+     * Получает все транзакции расходов из базы данных.
+     * Транзакции возвращаются в порядке убывания даты (от новых к старым).
+     *
+     * @return Список всех транзакций расходов с информацией о категориях
+     */
     fun getAll(): List<Row> {
         val list = mutableListOf<Row>()
         val sql = """
@@ -35,5 +54,11 @@ object GetExpensesTransactions {
         return list
     }
 
+    /**
+     * Получает максимальный идентификатор транзакции расхода.
+     * Используется для получения ID только что добавленной транзакции.
+     *
+     * @return Максимальный ID или 0, если транзакций нет
+     */
     fun getLastId() = getAll().maxOfOrNull { it.id } ?: 0
 }

@@ -16,6 +16,12 @@ import androidx.compose.runtime.getValue
 import ui.components.NavigationBar
 import viewmodel.FinanceViewModel
 
+/**
+ * Экран "Настройки" - управление категориями доходов и расходов.
+ * Позволяет просматривать, добавлять и удалять категории.
+ *
+ * @param viewModel ViewModel с данными категорий
+ */
 @Composable
 fun SettingsScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
@@ -34,6 +40,7 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
 
             Spacer(Modifier.height(24.dp))
 
+            // Секция категорий доходов
             CategorySection(
                 title = "Категории доходов",
                 count = state.incomeCategories.size,
@@ -45,6 +52,7 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
 
             Spacer(Modifier.height(24.dp))
 
+            // Секция категорий расходов
             CategorySection(
                 title = "Категории расходов",
                 count = state.expenseCategories.size,
@@ -57,6 +65,16 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
     }
 }
 
+/**
+ * Отображает секцию с категориями определенного типа (доходы/расходы).
+ *
+ * @param title Заголовок секции
+ * @param count Количество категорий в секции
+ * @param categories Список категорий
+ * @param onAddClick Обработчик нажатия на кнопку добавления категории
+ * @param onDeleteClick Обработчик удаления категории
+ * @param isIncome Флаг, указывающий тип категорий (true - доходы, false - расходы)
+ */
 @Composable
 fun CategorySection(
     title: String,
@@ -89,6 +107,7 @@ fun CategorySection(
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                     )
                 }
+                // Кнопка добавления новой категории
                 Button(
                     onClick = onAddClick,
                     modifier = Modifier.height(36.dp)
@@ -107,6 +126,7 @@ fun CategorySection(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             } else {
+                // Список категорий с возможностью прокрутки
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 200.dp)
                 ) {
@@ -123,6 +143,13 @@ fun CategorySection(
     }
 }
 
+/**
+ * Отображает одну категорию в списке с кнопкой удаления.
+ *
+ * @param category Название категории
+ * @param onDelete Обработчик удаления категории
+ * @param isIncome Флаг типа категории (влияет на цвет фона)
+ */
 @Composable
 fun CategoryItem(
     category: String,
@@ -134,9 +161,9 @@ fun CategoryItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         backgroundColor = if (isIncome)
-            MaterialTheme.colors.secondary.copy(alpha = 0.1f)
+            MaterialTheme.colors.secondary.copy(alpha = 0.1f)  // Светло-зеленый для доходов
         else
-            MaterialTheme.colors.error.copy(alpha = 0.1f),
+            MaterialTheme.colors.error.copy(alpha = 0.1f),     // Светло-красный для расходов
         elevation = 0.dp
     ) {
         Row(
@@ -150,6 +177,7 @@ fun CategoryItem(
                 color = MaterialTheme.colors.onSurface
             )
 
+            // Кнопка удаления категории
             Button(
                 onClick = onDelete,
                 modifier = Modifier.width(100.dp).height(32.dp),

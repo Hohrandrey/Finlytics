@@ -2,9 +2,22 @@ package db.database_request
 
 import java.sql.DriverManager
 
+/**
+ * Объект для обновления транзакций доходов в базе данных.
+ */
 object UpdateIncomeTransaction {
     private val DB_URL = DatabaseConfig.DB_URL
 
+    /**
+     * Обновляет существующую транзакцию дохода.
+     *
+     * @param transactionId Идентификатор обновляемой транзакции (должен быть > 0)
+     * @param name Новое название транзакции (может быть null)
+     * @param sum Новая сумма транзакции (должна быть положительной)
+     * @param categoryName Новое название категории (должна существовать в базе)
+     * @param date Новая дата транзакции в формате строки (ГГГГ-ММ-ДД)
+     * @return true если транзакция успешно обновлена, false в случае ошибки или некорректных данных
+     */
     fun update(
         transactionId: Int,
         name: String? = null,

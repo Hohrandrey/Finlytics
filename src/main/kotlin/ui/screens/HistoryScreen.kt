@@ -15,9 +15,16 @@ import ui.components.NavigationBar
 import viewmodel.FinanceViewModel
 import java.time.format.DateTimeFormatter
 
+/**
+ * Экран "История" - отображает список всех финансовых операций.
+ * Операции сортируются по дате (сначала новые) и показываются в виде карточек.
+ *
+ * @param viewModel ViewModel с данными операций
+ */
 @Composable
 fun HistoryScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
+    // Форматтер для отображения даты в удобном формате
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -33,6 +40,7 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
             Text("История операций", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(16.dp))
 
+            // Ленивый список для эффективного отображения большого числа операций
             LazyColumn {
                 items(state.operations.sortedByDescending { it.date }) { op ->
                     Card(

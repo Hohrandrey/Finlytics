@@ -15,6 +15,12 @@ import ui.components.NavigationBar
 import ui.components.PieChart
 import viewmodel.FinanceViewModel
 
+/**
+ * Экран "Обзор" - главный экран приложения, отображающий сводку финансов.
+ * Показывает баланс, статистику доходов/расходов и диаграмму расходов по категориям.
+ *
+ * @param viewModel ViewModel с данными для отображения
+ */
 @Composable
 fun OverviewScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
@@ -34,10 +40,12 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
             Spacer(Modifier.height(24.dp))
 
+            // Компонент для выбора периода фильтрации
             FilterSelector(viewModel)
 
             Spacer(Modifier.height(24.dp))
 
+            // Карточка с балансом и статистикой
             Card(
                 backgroundColor = MaterialTheme.colors.surface,
                 modifier = Modifier.fillMaxWidth()
@@ -67,6 +75,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
             Text("Расходы по категориям", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(16.dp))
 
+            // Диаграмма распределения расходов
             PieChart(
                 state.expensesByCategory,
                 modifier = Modifier
@@ -77,6 +86,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
             Spacer(Modifier.height(24.dp))
 
+            // Кнопка для добавления новой операции
             Button(
                 onClick = { viewModel.showAddOperation() },
                 modifier = Modifier

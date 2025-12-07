@@ -10,6 +10,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import viewmodel.FinanceViewModel
 
+/**
+ * Панель навигации для переключения между основными экранами приложения.
+ * Отображается на всех экранах в верхней части.
+ *
+ * @param viewModel ViewModel для управления навигацией
+ */
 @Composable
 fun NavigationBar(viewModel: FinanceViewModel) {
     val currentScreen = viewModel.currentScreen
@@ -27,18 +33,21 @@ fun NavigationBar(viewModel: FinanceViewModel) {
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
+            // Кнопка "Обзор"
             NavigationButton(
                 text = "Обзор",
                 isSelected = currentScreen == "Overview",
                 onClick = { viewModel.navigateTo("Overview") }
             )
 
+            // Кнопка "История"
             NavigationButton(
                 text = "История",
                 isSelected = currentScreen == "History",
                 onClick = { viewModel.navigateTo("History") }
             )
 
+            // Кнопка "Настройки"
             NavigationButton(
                 text = "Настройки",
                 isSelected = currentScreen == "Settings",
@@ -48,6 +57,13 @@ fun NavigationBar(viewModel: FinanceViewModel) {
     }
 }
 
+/**
+ * Кнопка навигации в панели навигации.
+ *
+ * @param text Текст на кнопке
+ * @param isSelected Флаг, указывающий выбрана ли данная кнопка
+ * @param onClick Обработчик нажатия на кнопку
+ */
 @Composable
 fun NavigationButton(
     text: String,

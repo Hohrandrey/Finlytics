@@ -7,11 +7,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import viewmodel.FinanceViewModel
 
+/**
+ * Диалоговое окно для добавления новой категории (доходов или расходов).
+ * Позволяет пользователю ввести название новой категории.
+ *
+ * @param viewModel ViewModel для управления категориями
+ */
 @Composable
 fun CategoryDialog(viewModel: FinanceViewModel) {
     var categoryName by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
 
+    // Определяем тип категории для отображения в заголовке
     val categoryType = if (viewModel.isIncomeCategory) "доходов" else "расходов"
 
     AlertDialog(
@@ -48,11 +55,13 @@ fun CategoryDialog(viewModel: FinanceViewModel) {
         confirmButton = {
             Button(
                 onClick = {
+                    // Валидация: проверяем, что название не пустое
                     if (categoryName.trim().isEmpty()) {
                         error = "Введите название категории"
                         return@Button
                     }
 
+                    // Сохраняем категорию через ViewModel
                     viewModel.saveCategory(categoryName.trim())
                     categoryName = ""
                 },

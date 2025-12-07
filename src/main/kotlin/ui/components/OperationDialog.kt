@@ -16,6 +16,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.text.style.TextOverflow
 
+/**
+ * Диалоговое окно для добавления или редактирования финансовой операции.
+ * Поддерживает ввод всех параметров операции: тип, сумму, категорию и дату.
+ *
+ * @param viewModel ViewModel для управления операциями
+ */
 @Composable
 fun OperationDialog(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
@@ -30,6 +36,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
 
     val categories = if (type == "Доход") state.incomeCategories else state.expenseCategories
 
+    // Преобразуем текст в LocalDate с обработкой ошибок
     val selectedDate = remember(dateText) {
         try {
             LocalDate.parse(dateText)
@@ -48,6 +55,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
         title = { Text(if (viewModel.editingOperation == null) "Новая операция" else "Редактирование") },
         text = {
             Column {
+                // Выбор типа операции (Доход/Расход)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -93,6 +101,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
 
                 Spacer(Modifier.height(16.dp))
 
+                // Поле для ввода суммы
                 OutlinedTextField(
                     value = amount,
                     onValueChange = {
@@ -115,12 +124,14 @@ fun OperationDialog(viewModel: FinanceViewModel) {
 
                 Spacer(Modifier.height(16.dp))
 
+                // Поле для ввода даты с валидацией
                 OutlinedTextField(
                     value = dateText,
                     onValueChange = {
                         dateText = it
                         dateError = ""
 
+                        // Проверка формата даты в реальном времени
                         try {
                             LocalDate.parse(it)
                             dateError = ""
@@ -147,6 +158,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                     )
                 }
 
+                // Быстрые кнопки для выбора стандартных дат
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -198,6 +210,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
 
                 Spacer(Modifier.height(8.dp))
 
+                // Кнопки для смещения выбранной даты на один день
                 if (selectedDate != null) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -227,11 +240,13 @@ fun OperationDialog(viewModel: FinanceViewModel) {
 
                 Spacer(Modifier.height(16.dp))
 
+                // Выбор категории из списка
                 if (categories.isNotEmpty()) {
                     Column {
                         Text("Категория:", style = MaterialTheme.typography.caption)
                         Spacer(Modifier.height(4.dp))
 
+                        // Прокручиваемый список категорий
                         LazyColumn(
                             modifier = Modifier.heightIn(max = 200.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -271,6 +286,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                         }
                     }
                 } else {
+                    // Если категорий нет, предлагаем добавить новую
                     Column {
                         Text(
                             text = "Нет доступных категорий",
@@ -293,17 +309,20 @@ fun OperationDialog(viewModel: FinanceViewModel) {
         confirmButton = {
             Button(
                 onClick = {
+                    // Валидация суммы
                     val sum = amount.toDoubleOrNull()
                     if (sum == null || sum <= 0) {
                         amountError = "Введите корректную сумму"
                         return@Button
                     }
 
+                    // Валидация категории
                     if (category.isEmpty()) {
                         categoryError = "Выберите категорию"
                         return@Button
                     }
 
+                    // Валидация даты
                     val parsedDate = try {
                         LocalDate.parse(dateText)
                     } catch (e: DateTimeParseException) {
@@ -311,6 +330,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                         return@Button
                     }
 
+                    // Дополнительная проверка: дата не должна быть слишком далеко в будущем
                     if (parsedDate.isAfter(LocalDate.now().plusDays(1))) {
                         dateError = "Дата не может быть более чем на 1 день в будущем"
                         return@Button

@@ -38,7 +38,12 @@ fun AppPreview() {
     }
 }
 
+/**
+ * Точка входа в приложение.
+ * Инициализирует окно приложения и настраивает окружение.
+ */
 fun main() = application {
+    // Логирование для корректной работы с UTF-8
     LoggingConfig.setupLogging()
 
     val windowState = rememberWindowState(width = 1200.dp, height = 800.dp)
@@ -50,6 +55,7 @@ fun main() = application {
         undecorated = false,
         resizable = true
     ) {
+        // Минимальный размер окна для удобства использования
         window.minimumSize = java.awt.Dimension(800, 600)
         AppPreview()
     }

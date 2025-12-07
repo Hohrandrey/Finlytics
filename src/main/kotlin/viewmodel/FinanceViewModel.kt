@@ -9,16 +9,22 @@ import repository.FinanceRepository
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 
+/**
+ * ViewModel для управления состоянием приложения и бизнес-логикой.
+ * Следует архитектуре MVVM, обеспечивает реактивное обновление UI.
+ */
 class FinanceViewModel(private val repo: FinanceRepository) {
+    // Хранит текущее состояние приложения
     private val _state = MutableStateFlow(FinanceState())
     val state: StateFlow<FinanceState> = _state.asStateFlow()
 
+    // Текущий экран приложения
     var currentScreen by mutableStateOf("Overview")
         private set
 
+    // Флаги для отображения диалогов
     var showOperationDialog by mutableStateOf(false)
         private set
-
     var showCategoryDialog by mutableStateOf(false)
         private set
 
@@ -28,13 +34,22 @@ class FinanceViewModel(private val repo: FinanceRepository) {
     var isIncomeCategory by mutableStateOf(true)
         private set
 
+    // Инициализация данных при создании
     init {
         refresh()
     }
 
+    /**
+     * Пересчитывает статистику на основе списка операций.
+     *
+     * @param operations Список операций для анализа
+     */
     private fun calculateStatistics(operations: List<Operation>) {
+        // Суммируем доходы и расходы
         val income = operations.filter { it.type == "Доход" }.sumOf { it.amount }
         val expenses = operations.filter { it.type == "Расход" }.sumOf { it.amount }
+
+        // Группируем расходы по категориям для диаграммы
         val expByCat = operations.filter { it.type == "Расход" }
             .groupBy { it.category }
             .mapValues { it.value.sumOf { op -> op.amount } }
@@ -50,6 +65,10 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         )
     }
 
+    /**
+     * Обновляет данные из репозитория и пересчитывает статистику.
+     * Вызывается при изменении данных.
+     */
     fun refresh() {
         println("Обновление данных...")
         val allOps = repo.getAllOperations()
@@ -57,6 +76,11 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         calculateStatistics(allOps)
     }
 
+    /**
+     * Применяет фильтр по временному периоду.
+     *
+     * @param period Название периода ("День", "Неделя", "Месяц", "Год", "Все время")
+     */
     fun applyFilter(period: String) {
         val today = LocalDate.now()
         val operations = when (period) {
@@ -75,24 +99,42 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         calculateStatistics(operations)
     }
 
+    /**
+     * Открывает диалог добавления новой операции.
+     * Сбрасывает editingOperation в null для режима создания.
+     */
     fun showAddOperation() {
         println("Показать диалог добавления операции")
         editingOperation = null
         showOperationDialog = true
     }
 
+    /**
+     * Открывает диалог редактирования существующей операции.
+     *
+     * @param op Операция для редактирования
+     */
     fun showEditOperation(op: Operation) {
         println("Показать диалог редактирования операции: $op")
         editingOperation = op
         showOperationDialog = true
     }
 
+    /**
+     * Закрывает диалог операции и сбрасывает связанные состояния.
+     */
     fun hideOperationDialog() {
         println("Скрыть диалог операции")
         showOperationDialog = false
         editingOperation = null
     }
 
+    /**
+     * Сохраняет операцию: добавляет новую или обновляет существующую.
+     * Автоматически обновляет данные приложения после сохранения.
+     *
+     * @param op Операция для сохранения (при id=0 - добавление, иначе - обновление)
+     */
     fun saveOperation(op: Operation) {
         println("Сохранение операции: $op")
         try {
@@ -108,6 +150,11 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         }
     }
 
+    /**
+     * Удаляет операцию из базы данных.
+     *
+     * @param op Операция для удаления
+     */
     fun deleteOperation(op: Operation) {
         println("Удаление операции: $op")
         try {
@@ -118,17 +165,31 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         }
     }
 
+    /**
+     * Открывает диалог добавления новой категории.
+     *
+     * @param isIncome Тип добавляемой категории (true - доходы, false - расходы)
+     */
     fun showAddCategory(isIncome: Boolean) {
         println("Показать диалог добавления категории. Тип: ${if (isIncome) "доходы" else "расходы"}")
         isIncomeCategory = isIncome
         showCategoryDialog = true
     }
 
+    /**
+     * Закрывает диалог добавления категории.
+     */
     fun hideCategoryDialog() {
         println("Скрыть диалог категории")
         showCategoryDialog = false
     }
 
+    /**
+     * Сохраняет новую категорию в базу данных.
+     * Проверяет уникальность имени категории перед добавлением.
+     *
+     * @param name Название новой категории
+     */
     fun saveCategory(name: String) {
         println("Сохранение категории: '$name'. Тип: ${if (isIncomeCategory) "доходы" else "расходы"}")
         try {
@@ -139,6 +200,7 @@ class FinanceViewModel(private val repo: FinanceRepository) {
 
             val trimmedName = name.trim()
 
+            // Проверяем уникальность категории
             val existingCategories = if (isIncomeCategory)
                 state.value.incomeCategories
             else
@@ -163,13 +225,25 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         }
     }
 
+    /**
+     * Навигация между экранами приложения.
+     *
+     * @param screen Название целевого экрана ("Overview", "History", "Settings")
+     */
     fun navigateTo(screen: String) {
         currentScreen = screen
     }
 
+    /**
+     * Удаляет категорию, если с ней не связано ни одной операции.
+     *
+     * @param name Название категории для удаления
+     * @param isIncome Тип категории (true - доходы, false - расходы)
+     */
     fun deleteCategory(name: String, isIncome: Boolean) {
         println("Удаление категории: '$name'. Тип: ${if (isIncome) "доходы" else "расходы"}")
         try {
+            // Проверяем, есть ли операции с этой категорией
             val hasOperations = if (isIncome) {
                 state.value.operations.any { it.type == "Доход" && it.category == name }
             } else {
