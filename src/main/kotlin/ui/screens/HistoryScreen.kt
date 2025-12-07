@@ -9,13 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import ui.components.NavigationBar
 import viewmodel.FinanceViewModel
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun HistoryScreen(viewModel: FinanceViewModel) {
-    val state = viewModel.state.value
+    val state by viewModel.state.collectAsState()
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
     Column(modifier = Modifier.fillMaxSize()) {

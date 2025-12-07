@@ -3,34 +3,54 @@ package db.database_request
 import java.sql.DriverManager
 
 object AddCategory {
-    private const val DB_URL = "jdbc:sqlite:src/main/kotlin/db/database/Finlytics.db"
+    private val DB_URL = DatabaseConfig.DB_URL
 
     fun addIncomeCategory(name: String): Boolean {
-        if (name.isBlank()) return false
+        println("Добавление категории доходов: '$name'")
+        if (name.isBlank()) {
+            println("Имя категории пустое")
+            return false
+        }
+
         val sql = "INSERT INTO Income_categories (income_category_name) VALUES (?)"
         return try {
             DriverManager.getConnection(DB_URL).use { conn ->
                 conn.prepareStatement(sql).use { pstmt ->
                     pstmt.setString(1, name.trim())
-                    pstmt.executeUpdate() > 0
+                    val rowsAffected = pstmt.executeUpdate()
+                    val result = rowsAffected > 0
+                    println("Категория доходов '$name' добавлена. Затронуто строк: $rowsAffected, успех: $result")
+                    result
                 }
             }
         } catch (e: Exception) {
+            println("Ошибка при добавлении категории доходов '$name': ${e.message}")
+            e.printStackTrace()
             false
         }
     }
 
     fun addExpensesCategory(name: String): Boolean {
-        if (name.isBlank()) return false
+        println("Добавление категории расходов: '$name'")
+        if (name.isBlank()) {
+            println("Имя категории пустое")
+            return false
+        }
+
         val sql = "INSERT INTO expenses_categories (expenses_category_name) VALUES (?)"
         return try {
             DriverManager.getConnection(DB_URL).use { conn ->
                 conn.prepareStatement(sql).use { pstmt ->
                     pstmt.setString(1, name.trim())
-                    pstmt.executeUpdate() > 0
+                    val rowsAffected = pstmt.executeUpdate()
+                    val result = rowsAffected > 0
+                    println("Категория расходов '$name' добавлена. Затронуто строк: $rowsAffected, успех: $result")
+                    result
                 }
             }
         } catch (e: Exception) {
+            println("Ошибка при добавлении категории расходов '$name': ${e.message}")
+            e.printStackTrace()
             false
         }
     }

@@ -1,43 +1,74 @@
 package ui.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import viewmodel.FinanceViewModel
 
 @Composable
 fun CategoryDialog(viewModel: FinanceViewModel) {
-    val state = viewModel.state.value
-    if (!state.showCategoryDialog) return
+    var categoryName by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf("") }
 
-    var name by remember { mutableStateOf("") }
+    val categoryType = if (viewModel.isIncomeCategory) "доходов" else "расходов"
 
     AlertDialog(
-        onDismissRequest = { viewModel.hideCategoryDialog() },
-        title = { Text("Новая категория") },
+        onDismissRequest = {
+            viewModel.hideCategoryDialog()
+            categoryName = ""
+            error = ""
+        },
+        title = { Text("Добавить категорию $categoryType") },
         text = {
             Column {
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = categoryName,
+                    onValueChange = {
+                        categoryName = it
+                        error = ""
+                    },
                     label = { Text("Название категории") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = error.isNotEmpty()
                 )
+
+                if (error.isNotEmpty()) {
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
         },
         confirmButton = {
-            Button(onClick = {
-                if (name.isNotBlank()) {
-                    viewModel.saveCategory(name.trim())
-                }
-            }) {
+            Button(
+                onClick = {
+                    if (categoryName.trim().isEmpty()) {
+                        error = "Введите название категории"
+                        return@Button
+                    }
+
+                    viewModel.saveCategory(categoryName.trim())
+                    categoryName = ""
+                },
+                enabled = categoryName.isNotEmpty()
+            ) {
                 Text("Добавить")
             }
         },
         dismissButton = {
-            Button(onClick = { viewModel.hideCategoryDialog() }) {
+            TextButton(
+                onClick = {
+                    viewModel.hideCategoryDialog()
+                    categoryName = ""
+                    error = ""
+                }
+            ) {
                 Text("Отмена")
             }
         }

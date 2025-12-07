@@ -8,12 +8,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.window.application
 import repository.FinanceRepository
 import ui.App
 import ui.components.CategoryDialog
 import ui.components.OperationDialog
+import utils.LoggingConfig
 import viewmodel.FinanceViewModel
 
 @Composable
@@ -25,17 +26,27 @@ fun AppPreview() {
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize()) {
             App(viewModel)
-            OperationDialog(viewModel)
-            CategoryDialog(viewModel)
+
+            if (viewModel.showOperationDialog) {
+                OperationDialog(viewModel)
+            }
+
+            if (viewModel.showCategoryDialog) {
+                CategoryDialog(viewModel)
+            }
         }
     }
 }
 
 fun main() = application {
+    LoggingConfig.setupLogging()
+
+    val windowState = rememberWindowState(width = 1200.dp, height = 800.dp)
+
     Window(
         onCloseRequest = ::exitApplication,
         title = "Finlytics - Менеджер личных финансов",
-        state = WindowState(width = 1200.dp, height = 800.dp),
+        state = windowState,
         undecorated = false,
         resizable = true
     ) {

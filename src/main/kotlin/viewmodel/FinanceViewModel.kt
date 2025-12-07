@@ -1,32 +1,46 @@
 package viewmodel
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import models.Operation
 import repository.FinanceRepository
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 class FinanceViewModel(private val repo: FinanceRepository) {
     private val _state = MutableStateFlow(FinanceState())
     val state: StateFlow<FinanceState> = _state.asStateFlow()
+
     var currentScreen by mutableStateOf("Overview")
+        private set
 
-    init { refresh() }
+    var showOperationDialog by mutableStateOf(false)
+        private set
 
-    fun refresh() {
-        val ops = repo.getAllOperations()
-        val income = ops.filter { it.type == "Доход" }.sumOf { it.amount }
-        val expenses = ops.filter { it.type == "Расход" }.sumOf { it.amount }
-        val expByCat = ops.filter { it.type == "Расход" }
+    var showCategoryDialog by mutableStateOf(false)
+        private set
+
+    var editingOperation by mutableStateOf<Operation?>(null)
+        private set
+
+    var isIncomeCategory by mutableStateOf(true)
+        private set
+
+    init {
+        refresh()
+    }
+
+    private fun calculateStatistics(operations: List<Operation>) {
+        val income = operations.filter { it.type == "Доход" }.sumOf { it.amount }
+        val expenses = operations.filter { it.type == "Расход" }.sumOf { it.amount }
+        val expByCat = operations.filter { it.type == "Расход" }
             .groupBy { it.category }
             .mapValues { it.value.sumOf { op -> op.amount } }
 
         _state.value = _state.value.copy(
-            operations = ops,
+            operations = operations,
             totalIncome = income,
             totalExpenses = expenses,
             balance = income - expenses,
@@ -36,45 +50,142 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         )
     }
 
-    fun applyFilter(period: String) {
-        val (from, to) = when (period) {
-            "День" -> LocalDate.now() to LocalDate.now()
-            "Неделя" -> LocalDate.now().minusDays(6) to LocalDate.now()
-            "Месяц" -> LocalDate.now().withDayOfMonth(1) to LocalDate.now()
-            "Год" -> LocalDate.now().withDayOfYear(1) to LocalDate.now()
-            else -> LocalDate.MIN to LocalDate.MAX
-        }
-        val filtered = repo.getOperations(from, to)
-        // Пересчёт аналогично refresh()
-        refresh() // пока просто обновляем всё
+    fun refresh() {
+        println("Обновление данных...")
+        val allOps = repo.getAllOperations()
+        println("Операций загружено: ${allOps.size}")
+        calculateStatistics(allOps)
     }
 
-    fun showAddOperation() = _state.value.copy(showOperationDialog = true)
-    fun showEditOperation(op: Operation) = _state.value.copy(showOperationDialog = true, editingOperation = op)
-    fun hideOperationDialog() = _state.value.copy(showOperationDialog = false, editingOperation = null)
+    fun applyFilter(period: String) {
+        val today = LocalDate.now()
+        val operations = when (period) {
+            "День" -> repo.getOperations(today, today)
+            "Неделя" -> repo.getOperations(today.minusDays(7), today)
+            "Месяц" -> repo.getOperations(
+                today.withDayOfMonth(1),
+                today.with(TemporalAdjusters.lastDayOfMonth())
+            )
+            "Год" -> repo.getOperations(
+                today.withDayOfYear(1),
+                today.with(TemporalAdjusters.lastDayOfYear())
+            )
+            else -> repo.getAllOperations()
+        }
+        calculateStatistics(operations)
+    }
+
+    fun showAddOperation() {
+        println("Показать диалог добавления операции")
+        editingOperation = null
+        showOperationDialog = true
+    }
+
+    fun showEditOperation(op: Operation) {
+        println("Показать диалог редактирования операции: $op")
+        editingOperation = op
+        showOperationDialog = true
+    }
+
+    fun hideOperationDialog() {
+        println("Скрыть диалог операции")
+        showOperationDialog = false
+        editingOperation = null
+    }
 
     fun saveOperation(op: Operation) {
-        if (op.id == 0) repo.addOperation(op) else repo.updateOperation(op)
-        refresh()
-        hideOperationDialog()
+        println("Сохранение операции: $op")
+        try {
+            if (op.id == 0) {
+                repo.addOperation(op)
+            } else {
+                repo.updateOperation(op)
+            }
+            refresh()
+            hideOperationDialog()
+        } catch (e: Exception) {
+            println("Ошибка при сохранении операции: ${e.message}")
+        }
     }
 
     fun deleteOperation(op: Operation) {
-        repo.deleteOperation(op.id, op.type)
-        refresh()
+        println("Удаление операции: $op")
+        try {
+            repo.deleteOperation(op.id, op.type)
+            refresh()
+        } catch (e: Exception) {
+            println("Ошибка при удалении операции: ${e.message}")
+        }
     }
 
-    fun showAddCategory(isIncome: Boolean) = _state.value.copy(showCategoryDialog = true, isIncomeCategory = isIncome)
-    fun hideCategoryDialog() = _state.value.copy(showCategoryDialog = false)
+    fun showAddCategory(isIncome: Boolean) {
+        println("Показать диалог добавления категории. Тип: ${if (isIncome) "доходы" else "расходы"}")
+        isIncomeCategory = isIncome
+        showCategoryDialog = true
+    }
+
+    fun hideCategoryDialog() {
+        println("Скрыть диалог категории")
+        showCategoryDialog = false
+    }
 
     fun saveCategory(name: String) {
-        repo.addCategory(name, _state.value.isIncomeCategory)
-        refresh()
-        hideCategoryDialog()
+        println("Сохранение категории: '$name'. Тип: ${if (isIncomeCategory) "доходы" else "расходы"}")
+        try {
+            if (name.isBlank()) {
+                println("Имя категории пустое")
+                return
+            }
+
+            val trimmedName = name.trim()
+
+            val existingCategories = if (isIncomeCategory)
+                state.value.incomeCategories
+            else
+                state.value.expenseCategories
+
+            if (existingCategories.any { it.equals(trimmedName, ignoreCase = true) }) {
+                println("Категория '$trimmedName' уже существует")
+                return
+            }
+
+            val success = repo.addCategory(trimmedName, isIncomeCategory)
+            println("Категория добавлена. Успех: $success")
+
+            if (success) {
+                refresh()
+                hideCategoryDialog()
+            } else {
+                println("Не удалось добавить категорию")
+            }
+        } catch (e: Exception) {
+            println("Ошибка при добавлении категории: ${e.message}")
+        }
+    }
+
+    fun navigateTo(screen: String) {
+        currentScreen = screen
     }
 
     fun deleteCategory(name: String, isIncome: Boolean) {
-        repo.deleteCategory(name, isIncome)
-        refresh()
+        println("Удаление категории: '$name'. Тип: ${if (isIncome) "доходы" else "расходы"}")
+        try {
+            val hasOperations = if (isIncome) {
+                state.value.operations.any { it.type == "Доход" && it.category == name }
+            } else {
+                state.value.operations.any { it.type == "Расход" && it.category == name }
+            }
+
+            if (hasOperations) {
+                println("Нельзя удалить категорию '$name', так как есть операции с этой категорией")
+                return
+            }
+
+            repo.deleteCategory(name, isIncome)
+            refresh()
+        } catch (e: Exception) {
+            println("Ошибка при удалении категории: ${e.message}")
+            e.printStackTrace()
+        }
     }
 }

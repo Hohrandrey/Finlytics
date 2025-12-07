@@ -3,7 +3,7 @@ package db.database_request
 import java.sql.DriverManager
 
 object GetIncomeTransactions {
-    private const val DB_URL = "jdbc:sqlite:src/main/kotlin/db/database/Finlytics.db"
+    private val DB_URL = DatabaseConfig.DB_URL
 
     data class Row(
         val id: Int,

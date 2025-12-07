@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import ui.components.FilterSelector
 import ui.components.NavigationBar
 import ui.components.PieChart
@@ -15,7 +17,7 @@ import viewmodel.FinanceViewModel
 
 @Composable
 fun OverviewScreen(viewModel: FinanceViewModel) {
-    val state = viewModel.state.value
+    val state by viewModel.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         NavigationBar(viewModel)

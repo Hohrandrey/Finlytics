@@ -1,6 +1,5 @@
 package ui.screens
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,15 +7,18 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import ui.components.NavigationBar
 import viewmodel.FinanceViewModel
 
 @Composable
 fun SettingsScreen(viewModel: FinanceViewModel) {
-    val state = viewModel.state.value
+    val state by viewModel.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         NavigationBar(viewModel)
@@ -28,92 +30,134 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
-            Text("Настройки категорий", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text("Управление категориями", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
             Spacer(Modifier.height(24.dp))
 
-            Card(
+            CategorySection(
+                title = "Категории доходов",
+                count = state.incomeCategories.size,
+                categories = state.incomeCategories,
+                onAddClick = { viewModel.showAddCategory(true) },
+                onDeleteClick = { category -> viewModel.deleteCategory(category, true) },
+                isIncome = true
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            CategorySection(
+                title = "Категории расходов",
+                count = state.expenseCategories.size,
+                categories = state.expenseCategories,
+                onAddClick = { viewModel.showAddCategory(false) },
+                onDeleteClick = { category -> viewModel.deleteCategory(category, false) },
+                isIncome = false
+            )
+        }
+    }
+}
+
+@Composable
+fun CategorySection(
+    title: String,
+    count: Int,
+    categories: List<String>,
+    onAddClick: () -> Unit,
+    onDeleteClick: (String) -> Unit,
+    isIncome: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 2.dp
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                backgroundColor = MaterialTheme.colors.surface
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Категории доходов", fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.height(8.dp))
-
-                    if (state.incomeCategories.isEmpty()) {
-                        Text("Нет категорий", style = MaterialTheme.typography.caption)
-                    } else {
-                        LazyColumn {
-                            items(state.incomeCategories) { cat ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(cat, modifier = Modifier.weight(1f))
-                                    Button(
-                                        onClick = { viewModel.deleteCategory(cat, true) },
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = MaterialTheme.colors.error
-                                        )
-                                    ) {
-                                        Text("Удалить", color = Color.White)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-                    Button(
-                        onClick = { viewModel.showAddCategory(true) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Добавить категорию доходов")
-                    }
+                Column {
+                    Text(
+                        title,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 18.sp
+                    )
+                    Text(
+                        "Количество: $count",
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+                Button(
+                    onClick = onAddClick,
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text("+ Добавить")
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(12.dp))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                backgroundColor = MaterialTheme.colors.surface
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Категории расходов", fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.height(8.dp))
-
-                    if (state.expenseCategories.isEmpty()) {
-                        Text("Нет категорий", style = MaterialTheme.typography.caption)
-                    } else {
-                        LazyColumn {
-                            items(state.expenseCategories) { cat ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(cat, modifier = Modifier.weight(1f))
-                                    Button(
-                                        onClick = { viewModel.deleteCategory(cat, false) },
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = MaterialTheme.colors.error
-                                        )
-                                    ) {
-                                        Text("Удалить", color = Color.White)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-                    Button(
-                        onClick = { viewModel.showAddCategory(false) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Добавить категорию расходов")
+            if (categories.isEmpty()) {
+                Text(
+                    "Нет категорий. Нажмите 'Добавить' чтобы создать первую.",
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 200.dp)
+                ) {
+                    items(categories) { category ->
+                        CategoryItem(
+                            category = category,
+                            onDelete = { onDeleteClick(category) },
+                            isIncome = isIncome
+                        )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryItem(
+    category: String,
+    onDelete: () -> Unit,
+    isIncome: Boolean
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        backgroundColor = if (isIncome)
+            MaterialTheme.colors.secondary.copy(alpha = 0.1f)
+        else
+            MaterialTheme.colors.error.copy(alpha = 0.1f),
+        elevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = category,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colors.onSurface
+            )
+
+            Button(
+                onClick = onDelete,
+                modifier = Modifier.width(100.dp).height(32.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.colors.error
+                )
+            ) {
+                Text("Удалить", fontSize = 12.sp, color = Color.White)
             }
         }
     }

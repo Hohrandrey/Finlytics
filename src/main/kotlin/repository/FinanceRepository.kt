@@ -10,6 +10,7 @@ class FinanceRepository {
     }
 
     fun getAllOperations(): List<Operation> {
+        println("Получение всех операций...")
         val income = GetIncomeTransactions.getAll().map { row ->
             Operation(
                 id = row.id,
@@ -30,28 +31,56 @@ class FinanceRepository {
             )
         }
 
-        return (income + expenses).sortedByDescending { it.date }
+        val allOps = (income + expenses).sortedByDescending { it.date }
+        println("Загружено операций: доходов=${income.size}, расходов=${expenses.size}, всего=${allOps.size}")
+        return allOps
     }
 
-    fun getOperations(from: LocalDate, to: LocalDate): List<Operation> =
-        getAllOperations().filter { it.date in from..to }
+    fun getOperations(from: LocalDate, to: LocalDate): List<Operation> {
+        println("Получение операций с $from по $to")
+        return getAllOperations().filter { it.date in from..to }
+    }
 
     fun addOperation(op: Operation): Operation {
+        println("Добавление операции: $op")
         return if (op.type == "Доход") {
             val catId = GetIncomeCategories.getIdByName(op.category)
                 ?: throw IllegalArgumentException("Категория доходов '${op.category}' не найдена")
-            AddIncomeTransaction.addIncomeTransaction(null, op.amount, catId, op.date.toString())
+
+            val success = AddIncomeTransaction.addIncomeTransaction(
+                name = null,
+                sum = op.amount,
+                categoryId = catId,
+                date = op.date.toString()
+            )
+
+            if (!success) {
+                throw RuntimeException("Не удалось добавить операцию дохода")
+            }
+
             op.copy(id = GetIncomeTransactions.getLastId())
         } else {
             val catId = GetExpensesCategories.getIdByName(op.category)
                 ?: throw IllegalArgumentException("Категория расходов '${op.category}' не найдена")
-            AddExpensesTransaction.addExpensesTransaction(null, op.amount, catId, op.date.toString())
+
+            val success = AddExpensesTransaction.addExpensesTransaction(
+                name = null,
+                sum = op.amount,
+                categoryId = catId,
+                date = op.date.toString()
+            )
+
+            if (!success) {
+                throw RuntimeException("Не удалось добавить операцию расхода")
+            }
+
             op.copy(id = GetExpensesTransactions.getLastId())
         }
     }
 
     fun updateOperation(op: Operation) {
-        if (op.type == "Доход") {
+        println("Обновление операции: $op")
+        val success = if (op.type == "Доход") {
             UpdateIncomeTransaction.update(
                 transactionId = op.id,
                 sum = op.amount,
@@ -66,31 +95,65 @@ class FinanceRepository {
                 date = op.date.toString()
             )
         }
+
+        if (!success) {
+            throw RuntimeException("Не удалось обновить операцию")
+        }
     }
 
     fun deleteOperation(id: Int, type: String) {
-        if (type == "Доход") {
+        println("Удаление операции: id=$id, type=$type")
+        val success = if (type == "Доход") {
             DeleteIncomeTransaction.deleteIncomeTransaction(id)
         } else {
             DeleteExpensesTransaction.deleteExpensesTransaction(id)
         }
+
+        if (!success) {
+            throw RuntimeException("Не удалось удалить операцию")
+        }
     }
 
-    // Категории
-    fun getIncomeCategories(): List<String> = GetIncomeCategories.getAllNames()
-    fun getExpenseCategories(): List<String> = GetExpensesCategories.getAllNames()
+    fun getIncomeCategories(): List<String> {
+        println("Получение категорий доходов...")
+        val categories = GetIncomeCategories.getAllNames()
+        println("Категории доходов: $categories")
+        return categories
+    }
 
-    fun addCategory(name: String, isIncome: Boolean) {
-        if (isIncome) AddCategory.addIncomeCategory(name)
-        else AddCategory.addExpensesCategory(name)
+    fun getExpenseCategories(): List<String> {
+        println("Получение категорий расходов...")
+        val categories = GetExpensesCategories.getAllNames()
+        println("Категории расходов: $categories")
+        return categories
+    }
+
+    fun addCategory(name: String, isIncome: Boolean): Boolean {
+        println("Добавление категории: name='$name', isIncome=$isIncome")
+        return if (isIncome) {
+            AddCategory.addIncomeCategory(name)
+        } else {
+            AddCategory.addExpensesCategory(name)
+        }
     }
 
     fun deleteCategory(name: String, isIncome: Boolean) {
+        println("Удаление категории: name='$name', isIncome=$isIncome")
         val id = if (isIncome) GetIncomeCategories.getIdByName(name)
         else GetExpensesCategories.getIdByName(name)
-        if (id != null) {
-            if (isIncome) DeleteCategory.deleteIncomeCategory(id)
-            else DeleteCategory.deleteExpensesCategory(id)
+
+        if (id == null) {
+            throw IllegalArgumentException("Категория '$name' не найдена")
+        }
+
+        val success = if (isIncome) {
+            DeleteCategory.deleteIncomeCategory(id)
+        } else {
+            DeleteCategory.deleteExpensesCategory(id)
+        }
+
+        if (!success) {
+            throw RuntimeException("Не удалось удалить категорию '$name'")
         }
     }
 }

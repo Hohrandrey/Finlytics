@@ -10,9 +10,5 @@ data class FinanceState(
     val expensesByCategory: Map<String, Double> = emptyMap(),
     val incomeCategories: List<String> = emptyList(),
     val expenseCategories: List<String> = emptyList(),
-    val showOperationDialog: Boolean = false,
-    val showCategoryDialog: Boolean = false,
-    val editingOperation: Operation? = null,
-    val editingCategory: String? = null,
-    val isIncomeCategory: Boolean = true
+    val editingCategory: String? = null
 )

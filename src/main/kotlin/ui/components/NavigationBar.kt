@@ -30,19 +30,19 @@ fun NavigationBar(viewModel: FinanceViewModel) {
             NavigationButton(
                 text = "Обзор",
                 isSelected = currentScreen == "Overview",
-                onClick = { viewModel.currentScreen = "Overview" }
+                onClick = { viewModel.navigateTo("Overview") }
             )
 
             NavigationButton(
                 text = "История",
                 isSelected = currentScreen == "History",
-                onClick = { viewModel.currentScreen = "History" }
+                onClick = { viewModel.navigateTo("History") }
             )
 
             NavigationButton(
                 text = "Настройки",
                 isSelected = currentScreen == "Settings",
-                onClick = { viewModel.currentScreen = "Settings" }
+                onClick = { viewModel.navigateTo("Settings") }
             )
         }
     }

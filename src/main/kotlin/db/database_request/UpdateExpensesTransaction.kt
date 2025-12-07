@@ -3,7 +3,7 @@ package db.database_request
 import java.sql.DriverManager
 
 object UpdateExpensesTransaction {
-    private const val DB_URL = "jdbc:sqlite:src/main/kotlin/db/database/Finlytics.db"
+    private val DB_URL = DatabaseConfig.DB_URL
 
     fun update(
         transactionId: Int,

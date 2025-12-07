@@ -3,7 +3,7 @@ package db.database_request
 import java.sql.DriverManager
 
 object AddIncomeTransaction {
-    private const val DB_URL = "jdbc:sqlite:src/main/kotlin/db/database/Finlytics.db"
+    private val DB_URL = DatabaseConfig.DB_URL
 
     fun addIncomeTransaction(name: String?, sum: Double, categoryId: Int, date: String): Boolean {
         if (sum <= 0 || categoryId <= 0) return false

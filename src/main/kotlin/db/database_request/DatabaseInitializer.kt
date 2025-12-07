@@ -1,9 +1,17 @@
 package db.database_request
 
 import java.sql.DriverManager
+import java.io.File
 
 object DatabaseInitializer {
-    private const val DB_URL = "jdbc:sqlite:src/main/kotlin/db/database/Finlytics.db"
+    private val DB_URL = DatabaseConfig.DB_URL
+
+    init {
+        val dbFile = File("src/main/kotlin/db/database/Finlytics.db")
+        dbFile.parentFile.mkdirs()
+        println("Путь к БД: ${dbFile.absolutePath}")
+        println("БД существует: ${dbFile.exists()}")
+    }
 
     fun createTablesIfNotExist() {
         val sql = """
@@ -35,14 +43,21 @@ object DatabaseInitializer {
 
         try {
             DriverManager.getConnection(DB_URL).use { conn ->
+                println("Подключение к БД успешно")
                 conn.createStatement().use { stmt ->
                     sql.split(";").forEach { query ->
-                        if (query.trim().isNotEmpty()) stmt.execute(query.trim())
+                        if (query.trim().isNotEmpty()) {
+                            stmt.execute(query.trim())
+                        }
                     }
                 }
+                println("Таблицы созданы/проверены успешно")
+
+                DefaultCategories.initializeDefaultCategories()
             }
         } catch (e: Exception) {
             println("Ошибка инициализации БД: ${e.message}")
+            e.printStackTrace()
         }
     }
 }
