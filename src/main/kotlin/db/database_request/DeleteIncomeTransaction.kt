@@ -2,9 +2,18 @@ package db.database_request
 
 import java.sql.DriverManager
 
+/**
+ * Объект для удаления транзакций доходов из базы данных.
+ */
 object DeleteIncomeTransaction {
-    private const val DB_URL = "jdbc:sqlite:src/main/kotlin/db/database/Finlytics.db"
+    private val DB_URL = DatabaseConfig.DB_URL
 
+    /**
+     * Удаляет транзакцию дохода по её идентификатору.
+     *
+     * @param transactionId Идентификатор удаляемой транзакции (должен быть > 0)
+     * @return true если транзакция успешно удалена, false в случае ошибки или некорректного ID
+     */
     fun deleteIncomeTransaction(transactionId: Int): Boolean {
         if (transactionId <= 0) return false
 

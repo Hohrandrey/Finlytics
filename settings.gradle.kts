@@ -1,1 +1,1 @@
-rootProject.name = "Finlistics"
+rootProject.name = "Finlytics"
