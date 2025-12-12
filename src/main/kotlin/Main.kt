@@ -46,7 +46,7 @@ fun main() = application {
     // Логирование для корректной работы с UTF-8
     LoggingConfig.setupLogging()
 
-    val windowState = rememberWindowState(width = 1200.dp, height = 800.dp)
+    val windowState = rememberWindowState(width = 1440.dp, height = 1024.dp)
 
     Window(
         onCloseRequest = ::exitApplication,
