@@ -1,91 +1,121 @@
 package ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import viewmodel.FinanceViewModel
+import ui.theme.AppColors
+import ui.theme.icons.FinlyticsIconPack
+import ui.theme.icons.finlyticsiconpack.*
 
-/**
- * Панель навигации для переключения между основными экранами приложения.
- * Отображается на всех экранах в верхней части.
- *
- * @param viewModel ViewModel для управления навигацией
- */
 @Composable
 fun NavigationBar(viewModel: FinanceViewModel) {
     val currentScreen = viewModel.currentScreen
 
-    Card(
+    Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = 4.dp
+            .wrapContentSize()
+            .background(AppColors.DarkGreyColor, RoundedCornerShape(15.dp))
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            // Кнопка "Обзор"
-            NavigationButton(
-                text = "Обзор",
-                isSelected = currentScreen == "Overview",
-                onClick = { viewModel.navigateTo("Overview") }
-            )
+        NavigationButton(
+            text = "Добавить",
+            isSelected = currentScreen == "AddNew",
+            onClick = { viewModel.navigateTo("AddNew") },
+            Icon = FinlyticsIconPack.Add
+        )
 
-            // Кнопка "История"
-            NavigationButton(
-                text = "История",
-                isSelected = currentScreen == "History",
-                onClick = { viewModel.navigateTo("History") }
-            )
+        Spacer(Modifier.width(20.dp))
 
-            // Кнопка "Настройки"
-            NavigationButton(
-                text = "Настройки",
-                isSelected = currentScreen == "Settings",
-                onClick = { viewModel.navigateTo("Settings") }
-            )
-        }
+        NavigationButton(
+            text = "Обзор",
+            isSelected = currentScreen == "Overview",
+            onClick = { viewModel.navigateTo("Overview") },
+            Icon = FinlyticsIconPack.Statistic
+        )
+
+        Spacer(Modifier.width(20.dp))
+
+        NavigationButton(
+            text = "История",
+            isSelected = currentScreen == "History",
+            onClick = { viewModel.navigateTo("History") },
+            Icon = FinlyticsIconPack.History
+        )
+
+        Spacer(Modifier.width(20.dp))
+
+        NavigationButton(
+            text = "Настройки",
+            isSelected = currentScreen == "Settings",
+            onClick = { viewModel.navigateTo("Settings") },
+            Icon = FinlyticsIconPack.Settings
+        )
     }
 }
 
-/**
- * Кнопка навигации в панели навигации.
- *
- * @param text Текст на кнопке
- * @param isSelected Флаг, указывающий выбрана ли данная кнопка
- * @param onClick Обработчик нажатия на кнопку
- */
 @Composable
 fun NavigationButton(
     text: String,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    Icon: ImageVector
 ) {
-    Button(
-        onClick = onClick,
+    val backgroundColor = if (isSelected) AppColors.BlueColor else AppColors.LightGreyColor
+    val textColor = AppColors.LightColor
+    val iconColor = AppColors.LightColor
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Box(
         modifier = Modifier
-            .widthIn(min = 120.dp)
-            .height(48.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (isSelected) MaterialTheme.colors.primary
-            else MaterialTheme.colors.surface
-        ),
-        contentPadding = PaddingValues(horizontal = 8.dp)
+            .wrapContentWidth()
+            .background(backgroundColor, RoundedCornerShape(15.dp))
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = text,
-            color = if (isSelected) Color.White else MaterialTheme.colors.onSurface,
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icon,
+                contentDescription = text,
+                modifier = Modifier.size(28.dp),
+                tint = iconColor
+            )
+
+            if (isSelected) {
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    text = text,
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = textColor,
+                        letterSpacing = 0.sp
+                    ),
+                    maxLines = 1
+                )
+            }
+        }
     }
 }
