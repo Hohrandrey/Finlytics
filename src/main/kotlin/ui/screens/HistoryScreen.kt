@@ -1,33 +1,39 @@
 package ui.screens
 
+import androidx.compose.foundation.*
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import ui.components.NavigationBar
-import viewmodel.FinanceViewModel
-import java.time.format.DateTimeFormatter
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import models.Operation
+import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.time.format.DateTimeFormatter
+import models.Operation
+import viewmodel.FinanceViewModel
+import ui.components.NavigationBar
+import ui.theme.AppColors
+import ui.theme.icons.FinlyticsIconPack
+import ui.theme.icons.finlyticsiconpack.*
 
 /**
- * Экран "История" - отображает список всех финансовых операций.
- * Операции сортируются по дате (сначала новые) и показываются в виде карточек.
- *
- * @param viewModel ViewModel с данными операций
+ * Экран "История" - переписанный в соответствии с веб-дизайном
  */
 @Composable
 fun HistoryScreen(viewModel: FinanceViewModel) {
@@ -46,95 +52,251 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
         println("======================\n")
     }
 
-    // Форматтер для отображения даты в удобном формате
-    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    // Состояния для фильтров
+    var selectedFilter by remember { mutableStateOf("Все") }
+    var selectedPeriod by remember { mutableStateOf("День") }
+    var selectedDate by remember { mutableStateOf("29.09.2025") }
+    var operationToDelete by remember { mutableStateOf<Operation?>(null) }
 
-    // Состояние для хранения операции, которую пользователь хочет удалить
-    var operationToDelete by remember { mutableStateOf<models.Operation?>(null) }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        NavigationBar(viewModel)
-
-        Spacer(Modifier.height(16.dp))
-
-        Column(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.DarkColor)
+    ) {
+        // Контент страницы
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp)
         ) {
-            Text("История операций", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(16.dp))
-
-            // Ленивый список для эффективного отображения большого числа операций
-            LazyColumn {
-                items(state.operations.sortedByDescending { it.date }) { op ->
-                    Card(
+            // Секция настроек
+            Box(
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .height(193.dp)
+                    .background(AppColors.DarkGreyColor, RoundedCornerShape(30.dp))
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(65.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Фильтр по типу
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        backgroundColor = MaterialTheme.colors.surface,
-                        elevation = 2.dp
+                            .width(390.dp)
+                            .padding(start = 40.dp),
+                        verticalArrangement = Arrangement.spacedBy(15.dp)
                     ) {
+                        Text(
+                            "Параметр отображения",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = AppColors.LightColor
+                        )
+
                         Row(
-                            modifier = Modifier.padding(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(15.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Информация об операции
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        op.category,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = if (op.type == "Доход")
-                                            MaterialTheme.colors.secondary
-                                        else
-                                            MaterialTheme.colors.error
-                                    )
-                                    Text(
-                                        text = if (op.type == "Доход") "+${String.format("%.2f", op.amount)} ₽"
-                                        else "-${String.format("%.2f", op.amount)} ₽",
-                                        color = if (op.type == "Доход") MaterialTheme.colors.secondary
-                                        else MaterialTheme.colors.error,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                                Spacer(Modifier.height(4.dp))
-                                Text(op.date.format(formatter), fontSize = 12.sp)
+                            // Кнопка "Все"
+                            FilterButton(
+                                text = "Все",
+                                isSelected = selectedFilter == "Все",
+                                modifier = Modifier.width(85.dp).height(98.dp),
+                                onClick = { selectedFilter = "Все" }
+                            )
+
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(15.dp)
+                            ) {
+                                // Кнопка "Доходы"
+                                FilterButton(
+                                    text = "Доходы",
+                                    isSelected = selectedFilter == "Доходы",
+                                    icon = true,
+                                    modifier = Modifier.width(290.dp).height(42.dp),
+                                    onClick = { selectedFilter = "Доходы" }
+                                )
+
+                                // Кнопка "Расходы"
+                                FilterButton(
+                                    text = "Расходы",
+                                    isSelected = selectedFilter == "Расходы",
+                                    icon = true,
+                                    isIncome = false,
+                                    modifier = Modifier.width(290.dp).height(42.dp),
+                                    onClick = { selectedFilter = "Расходы" }
+                                )
+                            }
+                        }
+                    }
+
+                    // Фильтр по времени
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(65.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        // Период времени
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(15.dp)
+                        ) {
+                            Text(
+                                "Период времени",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = AppColors.LightColor
+                            )
+
+                            // Кнопки периодов
+                            Row(
+                                modifier = Modifier.width(397.dp),
+                                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                PeriodButton(
+                                    text = "День",
+                                    isSelected = selectedPeriod == "День",
+                                    onClick = { selectedPeriod = "День" }
+                                )
+                                PeriodButton(
+                                    text = "Неделя",
+                                    isSelected = selectedPeriod == "Неделя",
+                                    onClick = { selectedPeriod = "Неделя" }
+                                )
+                                PeriodButton(
+                                    text = "Месяц",
+                                    isSelected = selectedPeriod == "Месяц",
+                                    onClick = { selectedPeriod = "Месяц" }
+                                )
                             }
 
-                            // Кнопки действий
-                            Row {
-                                // Кнопка редактирования
-                                IconButton(
-                                    onClick = { viewModel.showEditOperation(op) },
-                                    modifier = Modifier.size(40.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = "Редактировать",
-                                        tint = MaterialTheme.colors.primary
-                                    )
-                                }
+                            Row(
+                                modifier = Modifier.width(397.dp),
+                                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                PeriodButton(
+                                    text = "Год",
+                                    isSelected = selectedPeriod == "Год",
+                                    onClick = { selectedPeriod = "Год" }
+                                )
+                                PeriodButton(
+                                    text = "Всё время",
+                                    isSelected = selectedPeriod == "Всё время",
+                                    onClick = { selectedPeriod = "Всё время" }
+                                )
+                                PeriodButton(
+                                    text = "Интервал",
+                                    isSelected = selectedPeriod == "Интервал",
+                                    onClick = { selectedPeriod = "Интервал" }
+                                )
+                            }
+                        }
 
-                                // Кнопка удаления
-                                IconButton(
-                                    onClick = { operationToDelete = op },
-                                    modifier = Modifier.size(40.dp)
+                        // Настройки даты
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                "День",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = AppColors.LightColor
+                            )
+
+                            // Поле ввода даты
+                            Box(
+                                modifier = Modifier
+                                    .width(392.dp)
+                                    .height(42.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(AppColors.LightGreyColor, RoundedCornerShape(10.dp))
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Удалить",
-                                        tint = MaterialTheme.colors.error
+                                    Spacer(Modifier.width(16.dp))
+                                    Text(
+                                        selectedDate,
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        color = AppColors.LightColor
                                     )
+
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        IconButton(
+                                            onClick = { /* Предыдущий день */ },
+                                            modifier = Modifier.size(20.dp)
+                                        ) {
+                                            // Здесь должна быть иконка стрелки влево
+                                            Text("←", color = AppColors.LightColor, fontSize = 16.sp)
+                                        }
+
+                                        IconButton(
+                                            onClick = { /* Следующий день */ },
+                                            modifier = Modifier.size(20.dp)
+                                        ) {
+                                            // Здесь должна быть иконка стрелки вправо
+                                            Text("→", color = AppColors.LightColor, fontSize = 16.sp)
+                                        }
+                                        Spacer(Modifier.width(16.dp))
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
+            // Основной контент
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 243.dp)
+            ) {
+                // Список операций
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    items(state.operations.sortedByDescending { it.date }) { operation ->
+                        TransactionItem(
+                            operation = operation,
+                            onEditClick = { viewModel.showEditOperation(operation) },
+                            onDeleteClick = { operationToDelete = operation }
+                        )
+
+                        // Разделитель (кроме последнего элемента)
+                        if (operation != state.operations.sortedByDescending { it.date }.last()) {
+                            Divider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(1.dp),
+                                color = AppColors.LightGreyColor
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Навигационная панель
+        Box(
+            modifier = Modifier
+                .padding(bottom = 10.dp)
+                .align(Alignment.BottomCenter)
+        ) {
+            NavigationBar(viewModel)
         }
     }
 
@@ -154,18 +316,261 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                         viewModel.deleteOperation(operationToDelete!!)
                         operationToDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.RedColor)
                 ) {
-                    Text("Удалить", color = MaterialTheme.colors.onError)
+                    Text("Удалить", color = AppColors.LightColor)
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { operationToDelete = null }
                 ) {
-                    Text("Отмена")
+                    Text("Отмена", color = AppColors.LightColor)
                 }
             }
         )
+    }
+}
+
+@Composable
+fun FilterButton(
+    text: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    icon: Boolean = false,
+    isIncome: Boolean = true,
+    onClick: () -> Unit
+) {
+    val blue = Color(0xFF2176FF)
+    val lightGrey = Color(0xFF444444)
+    val light = Color(0xFFF4F4F4)
+
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (isSelected) blue else lightGrey
+        ),
+        elevation = null
+    ) {
+        if (icon) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Здесь должны быть иконки доходов/расходов
+                if (isIncome) {
+                    Text("↑", color = light, fontSize = 16.sp)
+                } else {
+                    Text("↓", color = light, fontSize = 16.sp)
+                }
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = light
+                )
+            }
+        } else {
+            Text(
+                text,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Normal,
+                color = light
+            )
+        }
+    }
+}
+
+@Composable
+fun PeriodButton(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val blue = Color(0xFF2176FF)
+    val lightGrey = Color(0xFF444444)
+    val light = Color(0xFFF4F4F4)
+
+    Button(
+        onClick = onClick,
+        modifier = Modifier.defaultMinSize(minWidth = 70.dp),
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (isSelected) blue else lightGrey
+        ),
+        elevation = null
+    ) {
+        Text(
+            text,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Normal,
+            color = light
+        )
+    }
+}
+
+@Composable
+fun TransactionItem(
+    operation: Operation,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    val dateText = operation.date.format(formatter)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(bottom = 20.dp)
+    ) {
+        // Дата слева
+        Text(
+            text = "[ $dateText ]",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Light,
+            color = AppColors.LightColor,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .offset(x = 0.dp, y = 4.dp)
+        )
+
+        // Контент операции
+        Column(
+            modifier = Modifier
+                .width(1120.dp)
+                .align(Alignment.CenterStart)
+                .offset(x = 150.dp)
+                .wrapContentHeight(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Категория с цветным фоном
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .height(32.dp)
+                    .border(
+                        width = 1.dp,
+                        color = if (operation.type == "Доход") AppColors.GreenColor else AppColors.RedColor,
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .background(
+                        color = if (operation.type == "Доход")
+                            AppColors.GreenColor.copy(alpha = 0.25f) // green с прозрачностью 40% 66
+                        else
+                            AppColors.RedColor.copy(alpha = 0.25f), // red с прозрачностью 40%
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = operation.category,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = if (operation.type == "Доход") AppColors.GreenColor else AppColors.RedColor
+                )
+            }
+
+            // Описание
+            Text(
+                text = operation.name ?: "Без описания",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Light,
+                color = AppColors.LightColor
+            )
+
+            // Сумма
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Иконка плюса/минуса
+                Box(
+                    modifier = Modifier.size(14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (operation.type == "Доход") {
+                        Icon(
+                            imageVector = FinlyticsIconPack.Plus,
+                            contentDescription = "plus",
+                            modifier = Modifier.size(14.dp),
+                            tint = AppColors.LightColor
+                        )
+                    } else {
+                        Icon(
+                            imageVector = FinlyticsIconPack.Minus,
+                            contentDescription = "minus",
+                            modifier = Modifier.size(14.dp),
+                            tint = AppColors.LightColor
+                        )
+                    }
+                }
+
+                Text(
+                    text = String.format("%.2f", operation.amount).replace('.', ','),
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = AppColors.LightColor
+                )
+
+                // Символ рубля
+                Text(
+                    text = "₽",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = AppColors.LightColor
+                )
+            }
+        }
+
+        // Кнопки действий справа
+        Row(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Кнопка редактирования
+            IconButton(
+                onClick = onEditClick,
+                modifier = Modifier.size(50.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(AppColors.YellowColor, RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = FinlyticsIconPack.Edit,
+                        contentDescription = "edit",
+                        modifier = Modifier.size(50.dp),
+                        tint = AppColors.LightColor
+                    )
+                }
+            }
+
+            // Кнопка удаления
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.size(50.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(AppColors.RedColor, RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = FinlyticsIconPack.Delete,
+                        contentDescription = "delete",
+                        modifier = Modifier.size(50.dp),
+                        tint = AppColors.LightColor
+                    )
+                }
+            }
+        }
     }
 }

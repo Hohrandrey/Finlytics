@@ -5,6 +5,8 @@ import ui.theme.icons.finlyticsiconpack.Add
 import ui.theme.icons.finlyticsiconpack.Delete
 import ui.theme.icons.finlyticsiconpack.Edit
 import ui.theme.icons.finlyticsiconpack.History
+import ui.theme.icons.finlyticsiconpack.Minus
+import ui.theme.icons.finlyticsiconpack.Plus
 import ui.theme.icons.finlyticsiconpack.Settings
 import ui.theme.icons.finlyticsiconpack.Statistic
 import kotlin.collections.List as ____KtList
@@ -18,6 +20,6 @@ public val FinlyticsIconPack.AllIcons: ____KtList<ImageVector>
     if (__AllIcons != null) {
       return __AllIcons!!
     }
-    __AllIcons= listOf(Add, Delete, Edit, History, Settings, Statistic)
+    __AllIcons= listOf(Add, Delete, Edit, History, Minus, Plus, Settings, Statistic)
     return __AllIcons!!
   }
