@@ -350,7 +350,8 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                         type = type,
                         amount = sum,
                         category = category,
-                        date = parsedDate
+                        date = parsedDate,
+                        name = null
                     )
 
                     viewModel.saveOperation(op)

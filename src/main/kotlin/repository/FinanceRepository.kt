@@ -31,7 +31,8 @@ class FinanceRepository {
                 type = "Доход",
                 amount = row.amount,
                 category = row.category,
-                date = LocalDate.parse(row.date)
+                date = LocalDate.parse(row.date),
+                name = row.name
             )
         }
 
@@ -42,7 +43,8 @@ class FinanceRepository {
                 type = "Расход",
                 amount = row.amount,
                 category = row.category,
-                date = LocalDate.parse(row.date)
+                date = LocalDate.parse(row.date),
+                name = row.name
             )
         }
 
@@ -91,6 +93,7 @@ class FinanceRepository {
         println("Категория: ${op.category}")
         println("Сумма: ${op.amount}")
         println("Дата: ${op.date}")
+        println("Описание: ${op.name}")
         println("================================\n")
 
         return if (op.type == "Доход") {
@@ -100,10 +103,10 @@ class FinanceRepository {
 
             // Добавляем транзакцию в базу данных
             val success = AddIncomeTransaction.addIncomeTransaction(
-                name = null,
+                name = op.name,
                 sum = op.amount,
                 categoryId = catId,
-                date = op.date.toString()
+                date = op.date.toString(),
             )
 
             if (!success) {
@@ -119,7 +122,7 @@ class FinanceRepository {
 
             // Добавляем транзакцию в базу данных
             val success = AddExpensesTransaction.addExpensesTransaction(
-                name = null,
+                name = op.name,
                 sum = op.amount,
                 categoryId = catId,
                 date = op.date.toString()
@@ -145,6 +148,7 @@ class FinanceRepository {
         val success = if (op.type == "Доход") {
             UpdateIncomeTransaction.update(
                 transactionId = op.id,
+                name = op.name,
                 sum = op.amount,
                 categoryName = op.category,
                 date = op.date.toString()
@@ -152,6 +156,7 @@ class FinanceRepository {
         } else {
             UpdateExpensesTransaction.update(
                 transactionId = op.id,
+                name = op.name,
                 sum = op.amount,
                 categoryName = op.category,
                 date = op.date.toString()

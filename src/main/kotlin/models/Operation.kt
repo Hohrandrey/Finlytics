@@ -10,11 +10,13 @@ import java.time.LocalDate
  * @property amount Сумма операции (в рублях)
  * @property category Категория операции
  * @property date Дата совершения операции
+ * @property name Описание операции
  */
 data class Operation(
     val id: Int,
     val type: String,
     val amount: Double,
     val category: String,
-    val date: LocalDate
+    val date: LocalDate,
+    val name: String?
 )
