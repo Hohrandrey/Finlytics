@@ -36,7 +36,7 @@ fun NavigationBar(viewModel: FinanceViewModel) {
         NavigationButton(
             text = "Добавить",
             isSelected = currentScreen == "AddNew",
-            onClick = { viewModel.navigateTo("AddNew") },
+            onClick = { viewModel.showAddOperation() },
             Icon = FinlyticsIconPack.Add
         )
 
