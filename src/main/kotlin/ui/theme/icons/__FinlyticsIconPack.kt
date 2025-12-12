@@ -2,6 +2,8 @@ package ui.theme.icons
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import ui.theme.icons.finlyticsiconpack.Add
+import ui.theme.icons.finlyticsiconpack.Delete
+import ui.theme.icons.finlyticsiconpack.Edit
 import ui.theme.icons.finlyticsiconpack.History
 import ui.theme.icons.finlyticsiconpack.Settings
 import ui.theme.icons.finlyticsiconpack.Statistic
@@ -16,6 +18,6 @@ public val FinlyticsIconPack.AllIcons: ____KtList<ImageVector>
     if (__AllIcons != null) {
       return __AllIcons!!
     }
-    __AllIcons= listOf(Add, History, Settings, Statistic)
+    __AllIcons= listOf(Add, Delete, Edit, History, Settings, Statistic)
     return __AllIcons!!
   }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -20,21 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ui.components.NavigationBar
+import ui.theme.AppColors
+import ui.theme.icons.FinlyticsIconPack
+import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
-
-// Цветовая схема из styleguide.css
-val DarkColor = Color(0xFF1E1E1E)
-val DarkGreyColor = Color(0xFF2C2C2C)
-val LightGreyColor = Color(0xFF444444)
-val LightColor = Color(0xFFF4F4F4)
-val BlueColor = Color(0xFF2176FF)
-val RedColor = Color(0xFFEF4444)
-val GreenColor = Color(0xFF4ADE80)
-val YellowColor = Color(0xFFECB324)
-val PurpleColor = Color(0xFF7300FF)
-val RoseColor = Color(0xFFFF00A6)
-val EmeraldColor = Color(0xFF00D9FB)
-val LimeColor = Color(0xFFEAFF00)
 
 /**
  * Экран "Настройки" в новом дизайне - управление категориями доходов и расходов.
@@ -46,13 +34,13 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkColor)
+            .background(AppColors.DarkColor)
     ) {
         // Основной контент
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 74.dp) // Место для навигационной панели
+                .padding(top = 50.dp, bottom = 124.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -68,8 +56,7 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
                     categories = state.incomeCategories,
                     onAddClick = { viewModel.showAddCategory(true) },
                     onDeleteClick = { category -> viewModel.deleteCategory(category, true) },
-                    modifier = Modifier.weight(1f),
-                    isScrollable = true
+                    modifier = Modifier.weight(1f)
                 )
 
                 // Правая панель - категории расходов
@@ -79,8 +66,7 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
                     categories = state.expenseCategories,
                     onAddClick = { viewModel.showAddCategory(false) },
                     onDeleteClick = { category -> viewModel.deleteCategory(category, false) },
-                    modifier = Modifier.weight(1f),
-                    isScrollable = true
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -88,8 +74,8 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
         // Навигационная панель
         Box(
             modifier = Modifier
+                .padding(bottom = 10.dp)
                 .align(Alignment.BottomCenter)
-                .offset(y = (-50).dp)
         ) {
             NavigationBar(viewModel)
         }
@@ -104,7 +90,6 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
  * @param categories Список категорий
  * @param onAddClick Обработчик добавления
  * @param onDeleteClick Обработчик удаления
- * @param isScrollable Флаг прокрутки списка
  */
 @Composable
 fun CategoryPanel(
@@ -113,14 +98,13 @@ fun CategoryPanel(
     categories: List<String>,
     onAddClick: () -> Unit,
     onDeleteClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    isScrollable: Boolean = false
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxHeight()
             .clip(RoundedCornerShape(40.dp))
-            .background(DarkGreyColor)
+            .background(AppColors.DarkGreyColor)
     ) {
         Column(
             modifier = Modifier
@@ -144,15 +128,14 @@ fun CategoryPanel(
                 ) {
                     Text(
                         text = "Нет категорий",
-                        color = LightColor.copy(alpha = 0.5f),
+                        color = AppColors.LightColor.copy(alpha = 0.5f),
                         fontSize = 16.sp
                     )
                 }
             } else {
                 CategoryList(
                     categories = categories,
-                    onDeleteClick = onDeleteClick,
-                    isScrollable = isScrollable
+                    onDeleteClick = onDeleteClick
                 )
             }
         }
@@ -179,7 +162,7 @@ fun PanelHeader(
         ) {
             Text(
                 text = title,
-                color = LightColor,
+                color = AppColors.LightColor,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Medium,
                 letterSpacing = 0.sp
@@ -189,12 +172,12 @@ fun PanelHeader(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
-                    .background(LightGreyColor)
+                    .background(AppColors.LightGreyColor)
                     .padding(horizontal = 10.dp, vertical = 2.dp)
             ) {
                 Text(
                     text = count.toString(),
-                    color = LightColor,
+                    color = AppColors.LightColor,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 0.sp
@@ -216,7 +199,7 @@ fun AddButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(30.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(BlueColor)
+            .background(AppColors.BlueColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -224,20 +207,11 @@ fun AddButton(onClick: () -> Unit) {
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Иконка плюса (вертикальная линия)
-        Box(
-            modifier = Modifier
-                .width(3.dp)
-                .height(20.dp)
-                .background(LightColor)
-        )
-
-        // Иконка плюса (горизонтальная линия)
-        Box(
-            modifier = Modifier
-                .width(20.dp)
-                .height(3.dp)
-                .background(LightColor)
+        Icon(
+            imageVector = FinlyticsIconPack.Add,
+            contentDescription = "add",
+            modifier = Modifier.size(28.dp),
+            tint = AppColors.LightColor
         )
     }
 }
@@ -248,38 +222,20 @@ fun AddButton(onClick: () -> Unit) {
 @Composable
 fun CategoryList(
     categories: List<String>,
-    onDeleteClick: (String) -> Unit,
-    isScrollable: Boolean
+    onDeleteClick: (String) -> Unit
 ) {
-    val scrollState = rememberScrollState()
     val lazyListState = rememberLazyListState()
 
-    if (isScrollable) {
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            items(categories) { category ->
-                CategoryItem(
-                    category = category,
-                    onDeleteClick = { onDeleteClick(category) }
-                )
-            }
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            categories.forEach { category ->
-                CategoryItem(
-                    category = category,
-                    onDeleteClick = { onDeleteClick(category) }
-                )
-            }
+    LazyColumn(
+        state = lazyListState,
+        modifier = Modifier.fillMaxHeight(),
+        verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
+        items(categories) { category ->
+            CategoryItem(
+                category = category,
+                onDeleteClick = { onDeleteClick(category) }
+            )
         }
     }
 }
@@ -302,13 +258,13 @@ fun CategoryItem(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(15.dp))
-                .background(LightGreyColor)
+                .background(AppColors.LightGreyColor)
         )
 
         // Название категории
         Text(
             text = category,
-            color = LightColor,
+            color = AppColors.LightColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = 0.sp,
@@ -341,8 +297,8 @@ fun EditButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(28.dp)
-            .clip(CircleShape)
-            .background(Color.Transparent)
+            .clip(RoundedCornerShape(8.dp))
+            .background(AppColors.YellowColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -350,33 +306,12 @@ fun EditButton(onClick: () -> Unit) {
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Иконка редактирования (упрощенная версия)
-        Box(
-            modifier = Modifier
-                .size(17.dp)
-        ) {
-            // Карандаш - прямоугольник с диагональной линией
-            Box(
-                modifier = Modifier
-                    .size(12.dp, 10.dp)
-                    .clip(RoundedCornerShape(1.dp))
-                    .border(
-                        width = 1.dp,
-                        color = LightColor.copy(alpha = 0.7f),
-                        shape = RoundedCornerShape(1.dp)
-                    )
-            )
-
-            // Диагональная линия карандаша
-            Box(
-                modifier = Modifier
-                    .width(7.dp)
-                    .height(1.dp)
-                    .background(LightColor.copy(alpha = 0.7f))
-                    .rotate(45f)
-                    .offset(x = 8.dp, y = 2.dp)
-            )
-        }
+        Icon(
+            imageVector = FinlyticsIconPack.Edit,
+            contentDescription = "edit",
+            modifier = Modifier.size(28.dp),
+            tint = AppColors.LightColor
+        )
     }
 }
 
@@ -388,8 +323,8 @@ fun DeleteButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(28.dp)
-            .clip(CircleShape)
-            .background(Color.Transparent)
+            .clip(RoundedCornerShape(8.dp))
+            .background(AppColors.RedColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -397,60 +332,11 @@ fun DeleteButton(onClick: () -> Unit) {
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Иконка корзины (упрощенная версия)
-        Column(
-            modifier = Modifier.size(15.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Верхняя часть корзины (ручка)
-            Box(
-                modifier = Modifier
-                    .width(13.dp)
-                    .height(2.dp)
-                    .background(LightColor.copy(alpha = 0.7f))
-            )
-
-            Spacer(modifier = Modifier.height(1.dp))
-
-            // Основная часть корзины
-            Box(
-                modifier = Modifier
-                    .width(15.dp)
-                    .height(11.dp)
-            ) {
-                // Боковые стороны корзины
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .border(
-                            width = 1.dp,
-                            color = LightColor.copy(alpha = 0.7f),
-                            shape = RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp)
-                        )
-                )
-
-                // Горизонтальные линии в корзине
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    repeat(2) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(LightColor.copy(alpha = 0.5f))
-                        )
-                    }
-                }
-            }
-        }
+        Icon(
+            imageVector = FinlyticsIconPack.Delete,
+            contentDescription = "delete",
+            modifier = Modifier.size(28.dp),
+            tint = AppColors.LightColor
+        )
     }
-}
-
-
-
-@Composable
-private fun Modifier.rotate(degrees: Float): Modifier = this.graphicsLayer {
-    rotationZ = degrees
 }
