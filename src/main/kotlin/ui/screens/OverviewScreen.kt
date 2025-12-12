@@ -15,6 +15,7 @@ import ui.components.NavigationBar
 import ui.components.PieChart
 import viewmodel.FinanceViewModel
 import androidx.compose.runtime.LaunchedEffect
+import javax.swing.Box
 
 /**
  * Экран "Обзор" - главный экран приложения, отображающий сводку финансов.
@@ -38,11 +39,9 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
         println("========================\n")
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        NavigationBar(viewModel)
-
-        Spacer(Modifier.height(16.dp))
-
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -126,6 +125,15 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
             ) {
                 Text("Добавить операцию", fontSize = 16.sp, color = MaterialTheme.colors.onPrimary)
             }
+        }
+
+        // Навигационная панель
+        Box(
+            modifier = Modifier
+                .padding(bottom = 10.dp)
+                .align(Alignment.BottomCenter)
+        ) {
+            NavigationBar(viewModel)
         }
     }
 }
