@@ -9,19 +9,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
@@ -77,15 +71,15 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                     .background(AppColors.DarkGreyColor, RoundedCornerShape(30.dp))
             ) {
                 Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(65.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 40.dp, end = 40.dp, top = 15.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
                     // Фильтр по типу
                     Column(
-                        modifier = Modifier
-                            .width(390.dp)
-                            .padding(start = 40.dp),
+                        modifier = Modifier.width(390.dp),
                         verticalArrangement = Arrangement.spacedBy(15.dp)
                     ) {
                         Text(
@@ -103,6 +97,7 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                             FilterButton(
                                 text = "Все",
                                 isSelected = selectedFilter == "Все",
+                                isAll = true,
                                 modifier = Modifier.width(85.dp).height(98.dp),
                                 onClick = { selectedFilter = "Все" }
                             )
@@ -132,124 +127,136 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                         }
                     }
 
-                    // Фильтр по времени
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(65.dp),
-                        verticalAlignment = Alignment.Top
+                    // Период времени
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(15.dp)
                     ) {
-                        // Период времени
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(15.dp)
+                        Text(
+                            "Период времени",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = AppColors.LightColor
+                        )
+
+                        // Кнопки периодов
+                        Row(
+                            modifier = Modifier.width(390.dp),
+                            horizontalArrangement = Arrangement.spacedBy(20.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                "Период времени",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = AppColors.LightColor
+                            PeriodButton(
+                                text = "День",
+                                isSelected = selectedPeriod == "День",
+                                onClick = { selectedPeriod = "День" }
                             )
-
-                            // Кнопки периодов
-                            Row(
-                                modifier = Modifier.width(397.dp),
-                                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                PeriodButton(
-                                    text = "День",
-                                    isSelected = selectedPeriod == "День",
-                                    onClick = { selectedPeriod = "День" }
-                                )
-                                PeriodButton(
-                                    text = "Неделя",
-                                    isSelected = selectedPeriod == "Неделя",
-                                    onClick = { selectedPeriod = "Неделя" }
-                                )
-                                PeriodButton(
-                                    text = "Месяц",
-                                    isSelected = selectedPeriod == "Месяц",
-                                    onClick = { selectedPeriod = "Месяц" }
-                                )
-                            }
-
-                            Row(
-                                modifier = Modifier.width(397.dp),
-                                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                PeriodButton(
-                                    text = "Год",
-                                    isSelected = selectedPeriod == "Год",
-                                    onClick = { selectedPeriod = "Год" }
-                                )
-                                PeriodButton(
-                                    text = "Всё время",
-                                    isSelected = selectedPeriod == "Всё время",
-                                    onClick = { selectedPeriod = "Всё время" }
-                                )
-                                PeriodButton(
-                                    text = "Интервал",
-                                    isSelected = selectedPeriod == "Интервал",
-                                    onClick = { selectedPeriod = "Интервал" }
-                                )
-                            }
+                            PeriodButton(
+                                text = "Неделя",
+                                isSelected = selectedPeriod == "Неделя",
+                                onClick = { selectedPeriod = "Неделя" }
+                            )
+                            PeriodButton(
+                                text = "Месяц",
+                                isSelected = selectedPeriod == "Месяц",
+                                onClick = { selectedPeriod = "Месяц" }
+                            )
                         }
 
-                        // Настройки даты
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        Row(
+                            modifier = Modifier.width(390.dp),
+                            horizontalArrangement = Arrangement.spacedBy(20.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                "День",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = AppColors.LightColor
+                            PeriodButton(
+                                text = "Год",
+                                isSelected = selectedPeriod == "Год",
+                                onClick = { selectedPeriod = "Год" }
                             )
+                            PeriodButton(
+                                text = "Всё время",
+                                isSelected = selectedPeriod == "Всё время",
+                                onClick = { selectedPeriod = "Всё время" }
+                            )
+                            PeriodButton(
+                                text = "Интервал",
+                                isSelected = selectedPeriod == "Интервал",
+                                onClick = { selectedPeriod = "Интервал" }
+                            )
+                        }
+                    }
 
-                            // Поле ввода даты
-                            Box(
-                                modifier = Modifier
-                                    .width(392.dp)
-                                    .height(42.dp)
+                    // Настройки даты
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            "День",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = AppColors.LightColor
+                        )
+
+                        // Поле ввода даты
+                        Box(
+                            modifier = Modifier
+                                .width(390.dp)
+                                .height(42.dp)
+                                .background(AppColors.LightGreyColor, RoundedCornerShape(10.dp))
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(AppColors.LightGreyColor, RoundedCornerShape(10.dp))
+                                Spacer(Modifier.width(16.dp))
+
+                                Icon(
+                                    imageVector = FinlyticsIconPack.Date,
+                                    contentDescription = "date",
+                                    modifier = Modifier.size(18.dp),
+                                    tint = AppColors.LightColor
                                 )
 
+                                Spacer(Modifier.width(18.dp))
+
+                                Text(
+                                    selectedDate,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = AppColors.LightColor
+                                )
+
+                                Spacer(Modifier.weight(1f))
+
                                 Row(
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Spacer(Modifier.width(16.dp))
-                                    Text(
-                                        selectedDate,
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = AppColors.LightColor
-                                    )
-
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                    IconButton(
+                                        onClick = { /* Предыдущий день */ },
+                                        modifier = Modifier
+                                            .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
+                                            .size(20.dp)
                                     ) {
-                                        IconButton(
-                                            onClick = { /* Предыдущий день */ },
-                                            modifier = Modifier.size(20.dp)
-                                        ) {
-                                            // Здесь должна быть иконка стрелки влево
-                                            Text("←", color = AppColors.LightColor, fontSize = 16.sp)
-                                        }
+                                        Icon(
+                                            imageVector = FinlyticsIconPack.Left,
+                                            contentDescription = "previous_day",
+                                            modifier = Modifier.size(20.dp),
+                                            tint = AppColors.LightColor
+                                        )
+                                    }
 
-                                        IconButton(
-                                            onClick = { /* Следующий день */ },
-                                            modifier = Modifier.size(20.dp)
-                                        ) {
-                                            // Здесь должна быть иконка стрелки вправо
-                                            Text("→", color = AppColors.LightColor, fontSize = 16.sp)
-                                        }
-                                        Spacer(Modifier.width(16.dp))
+                                    IconButton(
+                                        onClick = { /* Следующий день */ },
+                                        modifier = Modifier
+                                            .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
+                                            .size(20.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = FinlyticsIconPack.Right,
+                                            contentDescription = "next_day",
+                                            modifier = Modifier.size(20.dp),
+                                            tint = AppColors.LightColor
+                                        )
                                     }
                                 }
                             }
@@ -338,19 +345,19 @@ fun FilterButton(
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     icon: Boolean = false,
+    isAll: Boolean = false,
     isIncome: Boolean = true,
     onClick: () -> Unit
 ) {
-    val blue = Color(0xFF2176FF)
-    val lightGrey = Color(0xFF444444)
-    val light = Color(0xFFF4F4F4)
-
     Button(
         onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (isSelected) blue else lightGrey
+            backgroundColor = if (!isSelected) AppColors.LightGreyColor
+            else if (isAll) AppColors.BlueColor
+            else if (isIncome) AppColors.GreenColor
+            else AppColors.RedColor
         ),
         elevation = null
     ) {
@@ -359,18 +366,27 @@ fun FilterButton(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Здесь должны быть иконки доходов/расходов
                 if (isIncome) {
-                    Text("↑", color = light, fontSize = 16.sp)
+                    Icon(
+                        imageVector = FinlyticsIconPack.Income,
+                        contentDescription = "income",
+                        modifier = Modifier.size(22.dp),
+                        tint = AppColors.LightColor
+                    )
                 } else {
-                    Text("↓", color = light, fontSize = 16.sp)
+                    Icon(
+                        imageVector = FinlyticsIconPack.Expenses,
+                        contentDescription = "expenses",
+                        modifier = Modifier.size(22.dp),
+                        tint = AppColors.LightColor
+                    )
                 }
                 Spacer(Modifier.width(12.dp))
                 Text(
                     text,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Normal,
-                    color = light
+                    color = AppColors.LightColor
                 )
             }
         } else {
@@ -378,7 +394,7 @@ fun FilterButton(
                 text,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Normal,
-                color = light
+                color = AppColors.LightColor
             )
         }
     }
@@ -390,16 +406,12 @@ fun PeriodButton(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val blue = Color(0xFF2176FF)
-    val lightGrey = Color(0xFF444444)
-    val light = Color(0xFFF4F4F4)
-
     Button(
         onClick = onClick,
         modifier = Modifier.defaultMinSize(minWidth = 70.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (isSelected) blue else lightGrey
+            backgroundColor = if (isSelected) AppColors.BlueColor else AppColors.LightGreyColor
         ),
         elevation = null
     ) {
@@ -407,7 +419,7 @@ fun PeriodButton(
             text,
             fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
-            color = light
+            color = AppColors.LightColor
         )
     }
 }
