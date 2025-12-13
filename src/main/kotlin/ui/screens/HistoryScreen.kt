@@ -20,11 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
 import models.Operation
-import viewmodel.FinanceViewModel
 import ui.components.NavigationBar
 import ui.theme.AppColors
 import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
+import viewmodel.FinanceViewModel
 
 /**
  * Экран "История" - переписанный в соответствии с веб-дизайном
