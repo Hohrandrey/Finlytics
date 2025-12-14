@@ -347,7 +347,7 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Операции не найдены",
+                            "Нет операций за выбранный период",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Medium,
                             color = AppColors.LightGreyColor
@@ -467,12 +467,6 @@ private fun filterOperations(
                 val opDate = it.date
                 opDate in yearStart..yearEnd
             }
-        }
-        "Интервал" -> {
-            // Для интервала используем selectedDate как начальную дату
-            // В реальном приложении нужно добавить выбор конечной даты
-            // Показываем операции только за выбранный день
-            filteredByType.filter { it.date == selectedDate }
         }
         else -> filteredByType // "Всё время"
     }.sortedByDescending { it.date } // Сортируем по дате (новые сверху)
