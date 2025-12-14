@@ -479,7 +479,7 @@ private fun filterOperations(
 }
 
 @Composable
-fun FilterButton(
+private fun FilterButton(
     text: String,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
@@ -540,7 +540,7 @@ fun FilterButton(
 }
 
 @Composable
-fun PeriodButton(
+private fun PeriodButton(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -564,7 +564,7 @@ fun PeriodButton(
 }
 
 @Composable
-fun TransactionItem(
+private fun TransactionItem(
     operation: Operation,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit

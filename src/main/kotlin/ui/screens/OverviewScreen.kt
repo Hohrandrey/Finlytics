@@ -18,15 +18,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ui.App
-import ui.components.FilterSelector
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 import ui.components.NavigationBar
 import ui.components.PieChart
 import ui.theme.AppColors
 import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
-import kotlin.math.abs
+import kotlin.math.min
 
 /**
  * Экран "Обзор" - главный экран приложения, отображающий сводку финансов.
@@ -36,27 +37,68 @@ import kotlin.math.abs
 fun OverviewScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
 
-    // Получаем реальные данные для отображения
-    val totalIncome = state.totalIncome
-    val totalExpenses = state.totalExpenses
-    val balance = state.balance
-    val expensesByCategory = state.expensesByCategory
+    // Состояния для фильтров
+    var selectedFilter by remember { mutableStateOf("Расходы") } // По умолчанию показываем расходы
+    var selectedPeriod by remember { mutableStateOf("Всё время") }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+
+    // Форматирование даты для отображения
+    val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    val monthYearFormatter = DateTimeFormatter.ofPattern("MM.yyyy")
+    val yearFormatter = DateTimeFormatter.ofPattern("yyyy")
+
+    // Функция для фильтрации операций
+    val filteredOperations = remember(state.operations, selectedFilter, selectedPeriod, selectedDate) {
+        filterOperations(
+            operations = state.operations,
+            filterType = selectedFilter,
+            period = selectedPeriod,
+            selectedDate = selectedDate
+        )
+    }
+
+    // Вычисляем статистику на основе отфильтрованных операций
+    val totalIncome = filteredOperations.filter { it.type == "Доход" }.sumOf { it.amount }
+    val totalExpenses = filteredOperations.filter { it.type == "Расход" }.sumOf { it.amount }
+    val balance = totalIncome - totalExpenses
+
+    // Группируем расходы по категориям для диаграммы
+    val expensesByCategory = if (selectedFilter == "Расходы" || selectedFilter == "Все") {
+        filteredOperations
+            .filter { it.type == "Расход" }
+            .groupBy { it.category }
+            .mapValues { entry -> entry.value.sumOf { op -> op.amount } }
+    } else {
+        emptyMap()
+    }
 
     // Подготавливаем список категорий для отображения с процентами
     val categoryList = expensesByCategory.entries.sortedByDescending { it.value }
 
-    // Состояния для фильтров
-    var selectedFilter by remember { mutableStateOf("Расходы") }
-    var selectedPeriod by remember { mutableStateOf("День") }
-    var selectedDate by remember { mutableStateOf("29.09.2025") }
+    // Функция для получения отображаемой даты в зависимости от периода
+    val displayDateText = remember(selectedPeriod, selectedDate) {
+        when (selectedPeriod) {
+            "День" -> selectedDate.format(dateFormatter)
+            "Неделя" -> {
+                val weekStart = selectedDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                val weekEnd = weekStart.plusDays(6)
+                "${weekStart.format(dateFormatter)} - ${weekEnd.format(dateFormatter)}"
+            }
+            "Месяц" -> selectedDate.format(monthYearFormatter)
+            "Год" -> selectedDate.format(yearFormatter)
+            else -> ""
+        }
+    }
 
     // Отладочная информация о данных для диаграммы
-    LaunchedEffect(expensesByCategory) {
+    LaunchedEffect(filteredOperations, expensesByCategory) {
         println("\n=== OVERVIEW SCREEN ===")
+        println("Фильтр: $selectedFilter, Период: $selectedPeriod")
+        println("Всего операций: ${state.operations.size}")
+        println("Отфильтровано операций: ${filteredOperations.size}")
         println("Текущий баланс: ${balance} руб.")
         println("Общие доходы: ${totalIncome} руб.")
         println("Общие расходы: ${totalExpenses} руб.")
-        println("Количество операций: ${state.operations.size}")
         println("Категорий расходов для диаграммы: ${expensesByCategory.size}")
         println("Данные для диаграммы: $expensesByCategory")
         println("========================\n")
@@ -139,17 +181,26 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                             PeriodButton(
                                 text = "День",
                                 isSelected = selectedPeriod == "День",
-                                onClick = { selectedPeriod = "День" }
+                                onClick = {
+                                    selectedPeriod = "День"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                             PeriodButton(
                                 text = "Неделя",
                                 isSelected = selectedPeriod == "Неделя",
-                                onClick = { selectedPeriod = "Неделя" }
+                                onClick = {
+                                    selectedPeriod = "Неделя"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                             PeriodButton(
                                 text = "Месяц",
                                 isSelected = selectedPeriod == "Месяц",
-                                onClick = { selectedPeriod = "Месяц" }
+                                onClick = {
+                                    selectedPeriod = "Месяц"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                         }
 
@@ -161,98 +212,132 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                             PeriodButton(
                                 text = "Год",
                                 isSelected = selectedPeriod == "Год",
-                                onClick = { selectedPeriod = "Год" }
+                                onClick = {
+                                    selectedPeriod = "Год"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                             PeriodButton(
                                 text = "Всё время",
                                 isSelected = selectedPeriod == "Всё время",
-                                onClick = { selectedPeriod = "Всё время" }
+                                onClick = {
+                                    selectedPeriod = "Всё время"
+                                }
                             )
                             PeriodButton(
                                 text = "Интервал",
                                 isSelected = selectedPeriod == "Интервал",
-                                onClick = { selectedPeriod = "Интервал" }
+                                onClick = {
+                                    selectedPeriod = "Интервал"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                         }
                     }
 
-                    // Настройки даты
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            "День",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = AppColors.LightColor
-                        )
-
-                        // Поле ввода даты
-                        Box(
-                            modifier = Modifier
-                                .width(390.dp)
-                                .height(42.dp)
-                                .background(AppColors.LightGreyColor, RoundedCornerShape(10.dp))
+                    // Настройки даты (скрываем для "Всё время")
+                    if (selectedPeriod != "Всё время") {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalAlignment = Alignment.CenterVertically
+                            Text(
+                                selectedPeriod, // Подпись соответствует выбранному периоду
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = AppColors.LightColor
+                            )
+
+                            // Поле ввода даты
+                            Box(
+                                modifier = Modifier
+                                    .width(390.dp)
+                                    .height(42.dp)
+                                    .background(AppColors.LightGreyColor, RoundedCornerShape(10.dp))
                             ) {
-                                Spacer(Modifier.width(16.dp))
-
-                                Icon(
-                                    imageVector = FinlyticsIconPack.Date,
-                                    contentDescription = "date",
-                                    modifier = Modifier.size(18.dp),
-                                    tint = AppColors.LightColor
-                                )
-
-                                Spacer(Modifier.width(18.dp))
-
-                                Text(
-                                    selectedDate,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = AppColors.LightColor
-                                )
-
-                                Spacer(Modifier.weight(1f))
-
                                 Row(
-                                    modifier = Modifier.padding(end = 6.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.fillMaxSize(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    IconButton(
-                                        onClick = { /* Предыдущий день */ },
-                                        modifier = Modifier
-                                            .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
-                                            .size(20.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = FinlyticsIconPack.Left,
-                                            contentDescription = "previous_day",
-                                            modifier = Modifier.size(20.dp),
-                                            tint = AppColors.LightColor
-                                        )
-                                    }
+                                    Spacer(Modifier.width(16.dp))
 
-                                    IconButton(
-                                        onClick = { /* Следующий день */ },
-                                        modifier = Modifier
-                                            .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
-                                            .size(20.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = FinlyticsIconPack.Right,
-                                            contentDescription = "next_day",
-                                            modifier = Modifier.size(20.dp),
-                                            tint = AppColors.LightColor
-                                        )
+                                    Icon(
+                                        imageVector = FinlyticsIconPack.Date,
+                                        contentDescription = "date",
+                                        modifier = Modifier.size(18.dp),
+                                        tint = AppColors.LightColor
+                                    )
+
+                                    Spacer(Modifier.width(18.dp))
+
+                                    Text(
+                                        displayDateText,
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        color = AppColors.LightColor
+                                    )
+
+                                    Spacer(Modifier.weight(1f))
+
+                                    // Кнопки навигации показываем только для День/Неделя/Месяц/Год
+                                    if (selectedPeriod != "Интервал") {
+                                        Row(
+                                            modifier = Modifier.padding(end = 6.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            IconButton(
+                                                onClick = {
+                                                    // Предыдущий период
+                                                    selectedDate = when (selectedPeriod) {
+                                                        "День" -> selectedDate.minusDays(1)
+                                                        "Неделя" -> selectedDate.minusWeeks(1)
+                                                        "Месяц" -> selectedDate.minusMonths(1)
+                                                        "Год" -> selectedDate.minusYears(1)
+                                                        else -> selectedDate
+                                                    }
+                                                },
+                                                modifier = Modifier
+                                                    .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
+                                                    .size(20.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = FinlyticsIconPack.Left,
+                                                    contentDescription = "previous_period",
+                                                    modifier = Modifier.size(20.dp),
+                                                    tint = AppColors.LightColor
+                                                )
+                                            }
+
+                                            IconButton(
+                                                onClick = {
+                                                    // Следующий период
+                                                    selectedDate = when (selectedPeriod) {
+                                                        "День" -> selectedDate.plusDays(1)
+                                                        "Неделя" -> selectedDate.plusWeeks(1)
+                                                        "Месяц" -> selectedDate.plusMonths(1)
+                                                        "Год" -> selectedDate.plusYears(1)
+                                                        else -> selectedDate
+                                                    }
+                                                },
+                                                modifier = Modifier
+                                                    .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
+                                                    .size(20.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = FinlyticsIconPack.Right,
+                                                    contentDescription = "next_period",
+                                                    modifier = Modifier.size(20.dp),
+                                                    tint = AppColors.LightColor
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                    } else {
+                        // Пустой колонка для выравнивания, когда поле даты скрыто
+                        Spacer(modifier = Modifier.width(390.dp))
                     }
                 }
             }
@@ -271,26 +356,38 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                     modifier = Modifier.size(650.dp),
                     contentAlignment = Alignment.TopStart
                 ) {
-                    // Диаграмма расходов (только если есть данные)
+                    // Диаграмма (показываем только для фильтра "Расходы")
                     Box(
                         modifier = Modifier
                             .size(650.dp)
                             .align(Alignment.TopCenter)
                     ) {
-                        if (expensesByCategory.isNotEmpty()) {
+                        if (selectedFilter == "Расходы" && expensesByCategory.isNotEmpty()) {
                             PieChart(
                                 expensesByCategory,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(32.dp)
                             )
-                        } else {
+                        } else if (selectedFilter == "Расходы") {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    "Нет данных для диаграммы",
+                                    if (filteredOperations.isEmpty()) "Нет данных" else "Нет расходов за выбранный период",
+                                    fontSize = 20.sp,
+                                    color = AppColors.LightColor.copy(alpha = 0.5f)
+                                )
+                            }
+                        } else {
+                            // Для фильтра "Доходы" показываем сообщение
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "Диаграмма доступна только для расходов",
                                     fontSize = 20.sp,
                                     color = AppColors.LightColor.copy(alpha = 0.5f)
                                 )
@@ -469,22 +566,30 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                     }
                 }
 
-                // Список категорий расходов (правая часть)
+                // Список категорий расходов (правая часть) - показываем только для фильтра "Расходы"
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = if (categoryList.isEmpty()) {
+                    verticalArrangement = if (selectedFilter != "Расходы" || categoryList.isEmpty()) {
                         Arrangement.Center
                     } else {
                         Arrangement.spacedBy(25.dp)
                     }
                 ) {
-                    if (categoryList.isEmpty()) {
+                    if (selectedFilter != "Расходы") {
+                        // Сообщение для фильтра "Доходы"
+                        Text(
+                            "Список категорий доступен только для расходов",
+                            fontSize = 20.sp,
+                            color = AppColors.LightColor.copy(alpha = 0.5f),
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    } else if (categoryList.isEmpty()) {
                         // Сообщение об отсутствии данных
                         Text(
-                            "Нет данных о расходах",
+                            if (filteredOperations.isEmpty()) "Нет данных" else "Нет расходов за выбранный период",
                             fontSize = 20.sp,
                             color = AppColors.LightColor.copy(alpha = 0.5f),
                             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -555,7 +660,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                                 Box(modifier = Modifier.height(35.dp)) {
                                     // Прогресс-бар с реальным процентом
                                     // Используем minOf чтобы процент не превышал 100%
-                                    val normalizedPercentage = minOf(percentage, 100.0)
+                                    val normalizedPercentage = min(percentage, 100.0)
                                     val progressWidth = normalizedPercentage / 100.0
 
                                     Box(
@@ -606,5 +711,145 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
         ) {
             NavigationBar(viewModel)
         }
+    }
+}
+
+/**
+ * Функция фильтрации операций по типу и периоду (такая же как в HistoryScreen)
+ */
+private fun filterOperations(
+    operations: List<models.Operation>,
+    filterType: String,
+    period: String,
+    selectedDate: LocalDate
+): List<models.Operation> {
+    // 1. Фильтрация по типу операции
+    val filteredByType = when (filterType) {
+        "Доходы" -> operations.filter { it.type == "Доход" }
+        "Расходы" -> operations.filter { it.type == "Расход" }
+        else -> operations // "Все" - хотя на главной странице нет такого фильтра
+    }
+
+    // 2. Фильтрация по периоду времени
+    return when (period) {
+        "День" -> {
+            filteredByType.filter { it.date == selectedDate }
+        }
+        "Неделя" -> {
+            val weekStart = selectedDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+            val weekEnd = weekStart.plusDays(6)
+            filteredByType.filter {
+                val opDate = it.date
+                opDate in weekStart..weekEnd
+            }
+        }
+        "Месяц" -> {
+            val monthStart = selectedDate.withDayOfMonth(1)
+            val monthEnd = selectedDate.with(TemporalAdjusters.lastDayOfMonth())
+            filteredByType.filter {
+                val opDate = it.date
+                opDate in monthStart..monthEnd
+            }
+        }
+        "Год" -> {
+            val yearStart = selectedDate.withDayOfYear(1)
+            val yearEnd = selectedDate.with(TemporalAdjusters.lastDayOfYear())
+            filteredByType.filter {
+                val opDate = it.date
+                opDate in yearStart..yearEnd
+            }
+        }
+        "Интервал" -> {
+            // Для интервала используем selectedDate как начальную дату
+            // В реальном приложении нужно добавить выбор конечной даты
+            // Показываем операции только за выбранный день
+            filteredByType.filter { it.date == selectedDate }
+        }
+        else -> filteredByType // "Всё время"
+    }.sortedByDescending { it.date } // Сортируем по дате (новые сверху)
+}
+
+@Composable
+private fun FilterButton(
+    text: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    icon: Boolean = false,
+    isAll: Boolean = false,
+    isIncome: Boolean = true,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (!isSelected) AppColors.LightGreyColor
+            else if (isAll) AppColors.BlueColor
+            else if (isIncome) AppColors.GreenColor
+            else AppColors.RedColor
+        ),
+        elevation = null
+    ) {
+        if (icon) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isIncome) {
+                    Icon(
+                        imageVector = FinlyticsIconPack.Income,
+                        contentDescription = "income",
+                        modifier = Modifier.size(22.dp),
+                        tint = AppColors.LightColor
+                    )
+                } else {
+                    Icon(
+                        imageVector = FinlyticsIconPack.Expenses,
+                        contentDescription = "expenses",
+                        modifier = Modifier.size(22.dp),
+                        tint = AppColors.LightColor
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = AppColors.LightColor
+                )
+            }
+        } else {
+            Text(
+                text,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Normal,
+                color = AppColors.LightColor
+            )
+        }
+    }
+}
+
+@Composable
+private fun PeriodButton(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.defaultMinSize(minWidth = 70.dp),
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (isSelected) AppColors.BlueColor else AppColors.LightGreyColor
+        ),
+        elevation = null
+    ) {
+        Text(
+            text,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Normal,
+            color = AppColors.LightColor
+        )
     }
 }
