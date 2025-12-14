@@ -5,6 +5,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ui.theme.AppColors
 import viewmodel.FinanceViewModel
 
 /**
@@ -45,7 +46,7 @@ fun AddCategoryDialog(viewModel: FinanceViewModel) {
                 if (error.isNotEmpty()) {
                     Text(
                         text = error,
-                        color = MaterialTheme.colors.error,
+                        color = AppColors.RedColor,
                         style = MaterialTheme.typography.caption,
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -54,6 +55,7 @@ fun AddCategoryDialog(viewModel: FinanceViewModel) {
         },
         confirmButton = {
             Button(
+                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor),
                 onClick = {
                     // Валидация: проверяем, что название не пустое
                     if (categoryName.trim().isEmpty()) {
@@ -67,18 +69,19 @@ fun AddCategoryDialog(viewModel: FinanceViewModel) {
                 },
                 enabled = categoryName.isNotEmpty()
             ) {
-                Text("Добавить")
+                Text("Добавить", color = AppColors.LightColor)
             }
         },
         dismissButton = {
             TextButton(
+                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.RedColor),
                 onClick = {
                     viewModel.hideCategoryDialog()
                     categoryName = ""
                     error = ""
                 }
             ) {
-                Text("Отмена")
+                Text("Отмена", color = AppColors.LightColor)
             }
         }
     )
