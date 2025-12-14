@@ -10,12 +10,12 @@ import androidx.compose.ui.unit.dp
 import models.Operation
 import viewmodel.FinanceViewModel
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.LaunchedEffect
+import ui.theme.AppColors
 
 /**
  * Диалоговое окно для добавления или редактирования финансовой операции.
@@ -37,6 +37,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
 
     var type by remember { mutableStateOf(viewModel.editingOperation?.type ?: "Расход") }
     var amount by remember { mutableStateOf(viewModel.editingOperation?.amount?.toString() ?: "") }
+    var name by remember { mutableStateOf(viewModel.editingOperation?.name ?: "") }
     var category by remember { mutableStateOf(viewModel.editingOperation?.category ?: "") }
     var dateText by remember { mutableStateOf(viewModel.editingOperation?.date?.toString() ?: LocalDate.now().toString()) }
     var dateError by remember { mutableStateOf("") }
@@ -61,7 +62,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
             categoryError = ""
             dateError = ""
         },
-        title = { Text(if (viewModel.editingOperation == null) "Новая операция" else "Редактирование") },
+        title = { Text(if (viewModel.editingOperation == null) "Новая операция" else "Редактирование операции") },
         text = {
             Column {
                 // Выбор типа операции (Доход/Расход)
@@ -79,13 +80,14 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                     ) {
                         RadioButton(
                             selected = type == "Доход",
+                            colors = RadioButtonDefaults.colors(AppColors.GreenColor),
                             onClick = {
                                 type = "Доход"
                                 amountError = ""
                                 categoryError = ""
                             }
                         )
-                        Text("Доход", color = MaterialTheme.colors.secondary)
+                        Text("Доход")
                     }
 
                     Row(
@@ -98,13 +100,14 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                     ) {
                         RadioButton(
                             selected = type == "Расход",
+                            colors = RadioButtonDefaults.colors(AppColors.RedColor),
                             onClick = {
                                 type = "Расход"
                                 amountError = ""
                                 categoryError = ""
                             }
                         )
-                        Text("Расход", color = MaterialTheme.colors.error)
+                        Text("Расход")
                     }
                 }
 
@@ -125,7 +128,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                 if (amountError.isNotEmpty()) {
                     Text(
                         text = amountError,
-                        color = MaterialTheme.colors.error,
+                        color = AppColors.RedColor,
                         style = MaterialTheme.typography.caption,
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -161,7 +164,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                 if (dateError.isNotEmpty()) {
                     Text(
                         text = dateError,
-                        color = MaterialTheme.colors.error,
+                        color = AppColors.RedColor,
                         style = MaterialTheme.typography.caption,
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -193,9 +196,9 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                                         else -> false
                                     }
                                 } == true) {
-                                ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+                                ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor)
                             } else {
-                                ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface)
+                                ButtonDefaults.buttonColors(backgroundColor = AppColors.LightGreyColor)
                             }
                         ) {
                             Text(
@@ -208,9 +211,9 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                                             else -> false
                                         }
                                     } == true) {
-                                    MaterialTheme.colors.onPrimary
+                                    AppColors.LightColor
                                 } else {
-                                    MaterialTheme.colors.onSurface
+                                    AppColors.LightColor
                                 }
                             )
                         }
@@ -219,33 +222,15 @@ fun OperationDialog(viewModel: FinanceViewModel) {
 
                 Spacer(Modifier.height(8.dp))
 
-                // Кнопки для смещения выбранной даты на один день
-                if (selectedDate != null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Button(
-                            onClick = {
-                                val newDate = selectedDate.minusDays(1)
-                                dateText = newDate.toString()
-                            },
-                            modifier = Modifier.weight(1f).padding(end = 2.dp)
-                        ) {
-                            Text("-1 день")
-                        }
-
-                        Button(
-                            onClick = {
-                                val newDate = selectedDate.plusDays(1)
-                                dateText = newDate.toString()
-                            },
-                            modifier = Modifier.weight(1f).padding(start = 2.dp)
-                        ) {
-                            Text("+1 день")
-                        }
-                    }
-                }
+                // Поле для ввода описания
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                    },
+                    label = { Text("Описание (необязательно)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Spacer(Modifier.height(16.dp))
 
@@ -268,16 +253,16 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = if (category == item)
-                                        ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+                                        ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor)
                                     else
-                                        ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface)
+                                        ButtonDefaults.buttonColors(backgroundColor = AppColors.LightGreyColor)
                                 ) {
                                     Text(
                                         item,
                                         color = if (category == item)
-                                            MaterialTheme.colors.onPrimary
+                                            AppColors.LightColor
                                         else
-                                            MaterialTheme.colors.onSurface,
+                                            AppColors.LightColor,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -288,7 +273,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                         if (categoryError.isNotEmpty()) {
                             Text(
                                 text = categoryError,
-                                color = MaterialTheme.colors.error,
+                                color = AppColors.RedColor,
                                 style = MaterialTheme.typography.caption,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
@@ -299,7 +284,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                     Column {
                         Text(
                             text = "Нет доступных категорий",
-                            color = MaterialTheme.colors.error,
+                            color = AppColors.RedColor,
                             style = MaterialTheme.typography.caption
                         )
                         Spacer(Modifier.height(8.dp))
@@ -317,6 +302,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
         },
         confirmButton = {
             Button(
+                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor),
                 onClick = {
                     // Валидация суммы
                     val sum = amount.toDoubleOrNull()
@@ -351,18 +337,19 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                         amount = sum,
                         category = category,
                         date = parsedDate,
-                        name = null
+                        name = name
                     )
 
                     viewModel.saveOperation(op)
                 },
                 enabled = amount.isNotEmpty() && category.isNotEmpty() && dateText.isNotEmpty() && selectedDate != null
             ) {
-                Text("Сохранить")
+                Text("Сохранить", color = AppColors.LightColor)
             }
         },
         dismissButton = {
             TextButton(
+                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.RedColor),
                 onClick = {
                     viewModel.hideOperationDialog()
                     amountError = ""
@@ -370,7 +357,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                     dateError = ""
                 }
             ) {
-                Text("Отмена")
+                Text("Отмена", color = AppColors.LightColor)
             }
         }
     )

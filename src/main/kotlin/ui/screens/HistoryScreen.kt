@@ -622,7 +622,7 @@ private fun TransactionItem(
 
             // Описание
             Text(
-                text = operation.name ?: "Без описания",
+                text = if (operation.name == "" || operation.name == null) "Без описания" else operation.name,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Light,
                 color = AppColors.LightColor

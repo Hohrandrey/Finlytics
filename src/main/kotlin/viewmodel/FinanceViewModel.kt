@@ -108,29 +108,6 @@ class FinanceViewModel(private val repo: FinanceRepository) {
     }
 
     /**
-     * Применяет фильтр по временному периоду.
-     *
-     * @param period Название периода ("День", "Неделя", "Месяц", "Год", "Все время")
-     */
-    fun applyFilter(period: String) {
-        val today = LocalDate.now()
-        val operations = when (period) {
-            "День" -> repo.getOperations(today, today)
-            "Неделя" -> repo.getOperations(today.minusDays(7), today)
-            "Месяц" -> repo.getOperations(
-                today.withDayOfMonth(1),
-                today.with(TemporalAdjusters.lastDayOfMonth())
-            )
-            "Год" -> repo.getOperations(
-                today.withDayOfYear(1),
-                today.with(TemporalAdjusters.lastDayOfYear())
-            )
-            else -> repo.getAllOperations()
-        }
-        calculateStatistics(operations)
-    }
-
-    /**
      * Открывает диалог добавления новой операции.
      * Сбрасывает editingOperation в null для режима создания.
      */
