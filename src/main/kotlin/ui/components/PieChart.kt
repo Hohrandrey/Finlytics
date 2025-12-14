@@ -28,14 +28,22 @@ fun PieChart(
     data: Map<String, Double>,
     modifier: Modifier = Modifier,
     colors: List<Color> = listOf(
-        AppColors.BlueColor,
-        AppColors.EmeraldColor,
-        AppColors.GreenColor,
-        AppColors.LimeColor,
-        AppColors.YellowColor,
-        AppColors.RedColor,
-        AppColors.RoseColor,
-        AppColors.PurpleColor
+        AppColors.IncomeColor1,
+        AppColors.IncomeColor2,
+        AppColors.IncomeColor3,
+        AppColors.IncomeColor4,
+        AppColors.IncomeColor5,
+        AppColors.IncomeColor6,
+        AppColors.IncomeColor7,
+        AppColors.IncomeColor8,
+        AppColors.ExpensesColor1,
+        AppColors.ExpensesColor2,
+        AppColors.ExpensesColor3,
+        AppColors.ExpensesColor4,
+        AppColors.ExpensesColor5,
+        AppColors.ExpensesColor6,
+        AppColors.ExpensesColor7,
+        AppColors.ExpensesColor8
     )
 ) {
     println("\n=== PIE CHART ===")

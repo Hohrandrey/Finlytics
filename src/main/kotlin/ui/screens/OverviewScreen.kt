@@ -380,25 +380,25 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                                 // Используем зеленые цвета для доходов, красные для расходов
                                 colors = if (selectedFilter == "Доходы") {
                                     listOf(
-                                        AppColors.GreenColor.copy(alpha = 0.8f),
-                                        AppColors.EmeraldColor.copy(alpha = 0.8f),
-                                        AppColors.LimeColor.copy(alpha = 0.8f),
-                                        AppColors.YellowColor.copy(alpha = 0.8f),
-                                        Color(0xFF4CAF50), // green 500
-                                        Color(0xFF8BC34A), // light green 500
-                                        Color(0xFFCDDC39), // lime 500
-                                        Color(0xFFFFEB3B)  // yellow 500
+                                        AppColors.IncomeColor1,
+                                        AppColors.IncomeColor2,
+                                        AppColors.IncomeColor3,
+                                        AppColors.IncomeColor4,
+                                        AppColors.IncomeColor5,
+                                        AppColors.IncomeColor6,
+                                        AppColors.IncomeColor7,
+                                        AppColors.IncomeColor8
                                     )
                                 } else {
                                     listOf(
-                                        AppColors.RedColor.copy(alpha = 0.8f),
-                                        AppColors.RoseColor.copy(alpha = 0.8f),
-                                        AppColors.PurpleColor.copy(alpha = 0.8f),
-                                        AppColors.BlueColor.copy(alpha = 0.8f),
-                                        Color(0xFFF44336), // red 500
-                                        Color(0xFFE91E63), // pink 500
-                                        Color(0xFF9C27B0), // purple 500
-                                        Color(0xFF3F51B5)  // indigo 500
+                                        AppColors.ExpensesColor1,
+                                        AppColors.ExpensesColor2,
+                                        AppColors.ExpensesColor3,
+                                        AppColors.ExpensesColor4,
+                                        AppColors.ExpensesColor5,
+                                        AppColors.ExpensesColor6,
+                                        AppColors.ExpensesColor7,
+                                        AppColors.ExpensesColor8
                                     )
                                 }
                             )
@@ -614,25 +614,25 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                         // Карта градиентов для прогресс-баров (зеленые для доходов, красные для расходов)
                         val gradients = if (selectedFilter == "Доходы") {
                             listOf(
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.GreenColor)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.EmeraldColor)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.LimeColor)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.YellowColor)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, Color(0xFF4CAF50))),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, Color(0xFF8BC34A))),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, Color(0xFFCDDC39))),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, Color(0xFFFFEB3B)))
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor1)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor2)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor3)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor4)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor5)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor6)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor7)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor8))
                             )
                         } else {
                             listOf(
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.RedColor)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.RoseColor)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.PurpleColor)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.BlueColor)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, Color(0xFFF44336))),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, Color(0xFFE91E63))),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, Color(0xFF9C27B0))),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, Color(0xFF3F51B5)))
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor1)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor2)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor3)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor4)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor5)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor6)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor7)),
+                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor8))
                             )
                         }
 
