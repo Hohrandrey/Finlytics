@@ -12,12 +12,11 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ui.theme.AppColors
 import kotlin.math.*
+import ui.theme.AppColors
 
 /**
  * Компонент для отображения круговой диаграммы распределения расходов по категориям.
- * Обновленная версия, которая отображает настоящую круговую диаграмму (pie chart).
  *
  * @param data Карта данных, где ключ - название категории, значение - сумма расходов
  * @param modifier Модификатор для настройки внешнего вида компонента
@@ -113,7 +112,7 @@ fun PieChart(
             val centerOffset = Offset(size.width / 2, size.height / 2)
 
             // Вычисляем углы для каждого сегмента
-            var startAngle = -90f // Начинаем сверху (12 часов)
+            var startAngle = -90f
 
             filteredData.forEachIndexed { index, (_, amount) ->
                 val sweepAngle = (amount / total * 360).toFloat()

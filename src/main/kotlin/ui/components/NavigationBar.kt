@@ -16,10 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import viewmodel.FinanceViewModel
 import ui.theme.AppColors
 import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
+import viewmodel.FinanceViewModel
 
 @Composable
 fun NavigationBar(viewModel: FinanceViewModel) {

@@ -21,9 +21,7 @@ import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
-/**
- * Экран "Настройки" в новом дизайне - управление категориями доходов и расходов.
- */
+
 @Composable
 fun SettingsScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
@@ -79,15 +77,6 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
     }
 }
 
-/**
- * Панель категорий с дизайном из макета.
- *
- * @param title Заголовок панели
- * @param count Количество категорий
- * @param categories Список категорий
- * @param onAddClick Обработчик добавления
- * @param onDeleteClick Обработчик удаления
- */
 @Composable
 fun CategoryPanel(
     title: String,
@@ -139,9 +128,6 @@ fun CategoryPanel(
     }
 }
 
-/**
- * Заголовок панели категорий.
- */
 @Composable
 fun PanelHeader(
     title: String,
@@ -187,9 +173,6 @@ fun PanelHeader(
     }
 }
 
-/**
- * Кнопка добавления новой категории.
- */
 @Composable
 fun AddButton(onClick: () -> Unit) {
     Box(
@@ -213,9 +196,6 @@ fun AddButton(onClick: () -> Unit) {
     }
 }
 
-/**
- * Список категорий с возможностью прокрутки.
- */
 @Composable
 fun CategoryList(
     categories: List<String>,
@@ -237,9 +217,6 @@ fun CategoryList(
     }
 }
 
-/**
- * Элемент категории в списке.
- */
 @Composable
 fun CategoryItem(
     category: String,
@@ -286,9 +263,6 @@ fun CategoryItem(
     }
 }
 
-/**
- * Кнопка редактирования категории.
- */
 @Composable
 fun EditButton(onClick: () -> Unit) {
     Box(
@@ -312,9 +286,6 @@ fun EditButton(onClick: () -> Unit) {
     }
 }
 
-/**
- * Кнопка удаления категории.
- */
 @Composable
 fun DeleteButton(onClick: () -> Unit) {
     Box(

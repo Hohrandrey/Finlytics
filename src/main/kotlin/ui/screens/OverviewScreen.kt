@@ -14,31 +14,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import kotlin.math.min
 import ui.components.NavigationBar
 import ui.components.PieChart
 import ui.theme.AppColors
 import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
-import kotlin.math.min
 
-/**
- * Экран "Обзор" - главный экран приложения, отображающий сводку финансов.
- * Переработан в соответствии с дизайном из Figma/CSS файлов.
- */
+
 @Composable
 fun OverviewScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
 
     // Состояния для фильтров
-    var selectedFilter by remember { mutableStateOf("Расходы") } // По умолчанию показываем расходы
+    var selectedFilter by remember { mutableStateOf("Расходы") }
     var selectedPeriod by remember { mutableStateOf("Всё время") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
 
@@ -246,13 +242,13 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                         }
                     }
 
-                    // Настройки даты (скрываем для "Всё время")
+                    // Настройки даты
                     if (selectedPeriod != "Всё время") {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(15.dp)
                         ) {
                             Text(
-                                selectedPeriod, // Подпись соответствует выбранному периоду
+                                selectedPeriod,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = AppColors.LightColor
@@ -289,7 +285,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
                                     Spacer(Modifier.weight(1f))
 
-                                    // Кнопки навигации показываем только для День/Неделя/Месяц/Год
+                                    // Кнопки навигации
                                     Row(
                                         modifier = Modifier.padding(end = 6.dp),
                                         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -353,7 +349,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
             Spacer(Modifier.height(40.dp))
 
-            // Основной контент: диаграмма и статистика (аналог data из CSS)
+            // Основной контент
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -377,7 +373,6 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(32.dp),
-                                // Используем зеленые цвета для доходов, красные для расходов
                                 colors = if (selectedFilter == "Доходы") {
                                     listOf(
                                         AppColors.IncomeColor1,
@@ -407,7 +402,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                         }
                     }
 
-                    // Блок статистики (доходы/расходы/баланс) - всегда показывает суммы за период
+                    // Блок статистики
                     Column(
                         modifier = Modifier
                             .width(280.dp)
@@ -578,7 +573,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                     }
                 }
 
-                // Список категорий (правая часть) - только для выбранного фильтра
+                // Список категорий (правая часть)
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -599,8 +594,6 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         )
                     } else {
-                        // Отображаем категории для выбранного фильтра
-                        // Для расчета процентов используем сумму только выбранного типа операций
                         val totalForCategoryType = if (selectedFilter == "Доходы") {
                             filteredOperationsByType
                                 .filter { it.type == "Доход" }
@@ -611,7 +604,6 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                                 .sumOf { it.amount }
                         }
 
-                        // Карта градиентов для прогресс-баров (зеленые для доходов, красные для расходов)
                         val gradients = if (selectedFilter == "Доходы") {
                             listOf(
                                 Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor1)),
@@ -637,7 +629,6 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                         }
 
                         categoryList.forEachIndexed { index, (category, amount) ->
-                            // Вычисляем процент от общей суммы выбранного типа операций
                             val percentage = if (totalForCategoryType > 0) {
                                 (amount / totalForCategoryType) * 100
                             } else {
@@ -685,8 +676,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                                 Spacer(Modifier.height(8.dp))
 
                                 Box(modifier = Modifier.height(35.dp)) {
-                                    // Прогресс-бар с реальным процентом
-                                    // Используем minOf чтобы процент не превышал 100%
+                                    // Прогресс-бар
                                     val normalizedPercentage = min(percentage, 100.0)
                                     val progressWidth = normalizedPercentage / 100.0
 
@@ -741,9 +731,6 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
     }
 }
 
-/**
- * Функция фильтрации операций только по периоду (без фильтрации по типу)
- */
 private fun filterOperationsByPeriod(
     operations: List<models.Operation>,
     period: String,
@@ -781,23 +768,20 @@ private fun filterOperationsByPeriod(
     }.sortedByDescending { it.date }
 }
 
-/**
- * Функция фильтрации операций по типу и периоду (только для диаграммы и списка категорий)
- */
 private fun filterOperationsByType(
     operations: List<models.Operation>,
     filterType: String,
     period: String,
     selectedDate: LocalDate
 ): List<models.Operation> {
-    // 1. Фильтрация по типу операции
+    // Фильтрация по типу операции
     val filteredByType = when (filterType) {
         "Доходы" -> operations.filter { it.type == "Доход" }
         "Расходы" -> operations.filter { it.type == "Расход" }
         else -> operations
     }
 
-    // 2. Фильтрация по периоду времени
+    // Фильтрация по периоду времени
     return when (period) {
         "День" -> {
             filteredByType.filter { it.date == selectedDate }

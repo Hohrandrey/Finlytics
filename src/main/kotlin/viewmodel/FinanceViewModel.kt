@@ -1,18 +1,16 @@
 package viewmodel
 
 import androidx.compose.runtime.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import models.Operation
-import repository.FinanceRepository
-import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.math.pow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import models.Operation
+import repository.FinanceRepository
 
 /**
  * ViewModel для управления состоянием приложения и бизнес-логикой.

@@ -28,9 +28,7 @@ import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
-/**
- * Экран "История" - переписанный в соответствии с веб-дизайном
- */
+
 @Composable
 fun HistoryScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
@@ -229,13 +227,13 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                         }
                     }
 
-                    // Настройки даты (скрываем для "Всё время")
+                    // Настройки даты
                     if (selectedPeriod != "Всё время") {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(15.dp)
                         ) {
                             Text(
-                                selectedPeriod, // Подпись соответствует выбранному периоду
+                                selectedPeriod,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = AppColors.LightColor
@@ -272,7 +270,7 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
 
                                     Spacer(Modifier.weight(1f))
 
-                                    // Кнопки навигации показываем только для День/Неделя/Месяц/Год
+                                    // Кнопки навигации
                                     Row(
                                         modifier = Modifier.padding(end = 6.dp),
                                         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -280,7 +278,6 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                                     ) {
                                         IconButton(
                                             onClick = {
-                                                // Предыдущий период
                                                 selectedDate = when (selectedPeriod) {
                                                     "День" -> selectedDate.minusDays(1)
                                                     "Неделя" -> selectedDate.minusWeeks(1)
@@ -303,7 +300,6 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
 
                                         IconButton(
                                             onClick = {
-                                                // Следующий период
                                                 selectedDate = when (selectedPeriod) {
                                                     "День" -> selectedDate.plusDays(1)
                                                     "Неделя" -> selectedDate.plusWeeks(1)
@@ -398,7 +394,8 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
             title = { Text("Подтверждение удаления") },
             text = {
                 Text("Вы уверены, что хотите удалить операцию?\n" +
-                        "${operationToDelete!!.category} - " +
+                        "${operationToDelete!!.category}: " +
+                        "${operationToDelete?.name ?: ""}\n" +
                         "${String.format("%.2f", operationToDelete!!.amount)} ₽")
             },
             confirmButton = {
@@ -423,23 +420,20 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
     }
 }
 
-/**
- * Функция фильтрации операций по типу и периоду
- */
 private fun filterOperations(
     operations: List<Operation>,
     filterType: String,
     period: String,
     selectedDate: LocalDate
 ): List<Operation> {
-    // 1. Фильтрация по типу операции
+    // Фильтрация по типу операции
     val filteredByType = when (filterType) {
         "Доходы" -> operations.filter { it.type == "Доход" }
         "Расходы" -> operations.filter { it.type == "Расход" }
         else -> operations // "Все"
     }
 
-    // 2. Фильтрация по периоду времени
+    // Фильтрация по периоду времени
     return when (period) {
         "День" -> {
             filteredByType.filter { it.date == selectedDate }
@@ -468,8 +462,8 @@ private fun filterOperations(
                 opDate in yearStart..yearEnd
             }
         }
-        else -> filteredByType // "Всё время"
-    }.sortedByDescending { it.date } // Сортируем по дате (новые сверху)
+        else -> filteredByType
+    }.sortedByDescending { it.date }
 }
 
 @Composable
