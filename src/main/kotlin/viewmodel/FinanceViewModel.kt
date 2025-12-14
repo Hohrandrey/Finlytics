@@ -33,7 +33,7 @@ class FinanceViewModel(private val repo: FinanceRepository) {
     // Флаги для отображения диалогов
     var showOperationDialog by mutableStateOf(false)
         private set
-    var showCategoryDialog by mutableStateOf(false)
+    var showAddCategoryDialog by mutableStateOf(false)
         private set
 
     var editingOperation by mutableStateOf<Operation?>(null)
@@ -204,7 +204,7 @@ class FinanceViewModel(private val repo: FinanceRepository) {
     fun showAddCategory(isIncome: Boolean) {
         println("Показать диалог добавления категории. Тип: ${if (isIncome) "доходы" else "расходы"}")
         isIncomeCategory = isIncome
-        showCategoryDialog = true
+        showAddCategoryDialog = true
     }
 
     /**
@@ -212,7 +212,7 @@ class FinanceViewModel(private val repo: FinanceRepository) {
      */
     fun hideCategoryDialog() {
         println("Скрыть диалог категории")
-        showCategoryDialog = false
+        showAddCategoryDialog = false
     }
 
     /**

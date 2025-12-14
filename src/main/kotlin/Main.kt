@@ -12,7 +12,7 @@ import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.window.application
 import repository.FinanceRepository
 import ui.App
-import ui.components.CategoryDialog
+import ui.components.AddCategoryDialog
 import ui.components.OperationDialog
 import utils.LoggingConfig
 import viewmodel.FinanceViewModel
@@ -31,8 +31,8 @@ fun AppPreview() {
                 OperationDialog(viewModel)
             }
 
-            if (viewModel.showCategoryDialog) {
-                CategoryDialog(viewModel)
+            if (viewModel.showAddCategoryDialog) {
+                AddCategoryDialog(viewModel)
             }
         }
     }

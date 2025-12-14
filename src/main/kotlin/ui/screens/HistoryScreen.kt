@@ -18,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 import models.Operation
 import ui.components.NavigationBar
 import ui.theme.AppColors
@@ -33,24 +35,41 @@ import viewmodel.FinanceViewModel
 fun HistoryScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
 
+    // Состояния для фильтров
+    var selectedFilter by remember { mutableStateOf("Все") }
+    var selectedPeriod by remember { mutableStateOf("Всё время") }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var operationToDelete by remember { mutableStateOf<Operation?>(null) }
+
+    // Форматирование даты для отображения
+    val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
+    // Функция для фильтрации операций
+    val filteredOperations = remember(state.operations, selectedFilter, selectedPeriod, selectedDate) {
+        filterOperations(
+            operations = state.operations,
+            filterType = selectedFilter,
+            period = selectedPeriod,
+            selectedDate = selectedDate
+        )
+    }
+
     // Отладочная информация об операциях
-    LaunchedEffect(state.operations) {
+    LaunchedEffect(state.operations, filteredOperations) {
         println("\n=== HISTORY SCREEN ===")
-        println("Всего операций: ${state.operations.size}")
-        println("Операций доходов: ${state.operations.count { it.type == "Доход" }}")
-        println("Операций расходов: ${state.operations.count { it.type == "Расход" }}")
-        println("Последние 3 операции:")
-        state.operations.take(3).forEach { op ->
-            println("  - ${op.type}: ${op.category} - ${op.amount} руб. (${op.date})")
+        println("Всего операций в базе: ${state.operations.size}")
+        println("Отфильтровано операций: ${filteredOperations.size}")
+        println("Фильтр: $selectedFilter, Период: $selectedPeriod")
+        println("Операций доходов: ${filteredOperations.count { it.type == "Доход" }}")
+        println("Операций расходов: ${filteredOperations.count { it.type == "Расход" }}")
+        if (filteredOperations.isNotEmpty()) {
+            println("Последние 3 отфильтрованные операции:")
+            filteredOperations.take(3).forEach { op ->
+                println("  - ${op.type}: ${op.category} - ${op.amount} руб. (${op.date})")
+            }
         }
         println("======================\n")
     }
-
-    // Состояния для фильтров
-    var selectedFilter by remember { mutableStateOf("Все") }
-    var selectedPeriod by remember { mutableStateOf("День") }
-    var selectedDate by remember { mutableStateOf("29.09.2025") }
-    var operationToDelete by remember { mutableStateOf<Operation?>(null) }
 
     Box(
         modifier = Modifier
@@ -147,17 +166,26 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                             PeriodButton(
                                 text = "День",
                                 isSelected = selectedPeriod == "День",
-                                onClick = { selectedPeriod = "День" }
+                                onClick = {
+                                    selectedPeriod = "День"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                             PeriodButton(
                                 text = "Неделя",
                                 isSelected = selectedPeriod == "Неделя",
-                                onClick = { selectedPeriod = "Неделя" }
+                                onClick = {
+                                    selectedPeriod = "Неделя"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                             PeriodButton(
                                 text = "Месяц",
                                 isSelected = selectedPeriod == "Месяц",
-                                onClick = { selectedPeriod = "Месяц" }
+                                onClick = {
+                                    selectedPeriod = "Месяц"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                         }
 
@@ -169,27 +197,37 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                             PeriodButton(
                                 text = "Год",
                                 isSelected = selectedPeriod == "Год",
-                                onClick = { selectedPeriod = "Год" }
+                                onClick = {
+                                    selectedPeriod = "Год"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                             PeriodButton(
                                 text = "Всё время",
                                 isSelected = selectedPeriod == "Всё время",
-                                onClick = { selectedPeriod = "Всё время" }
+                                onClick = {
+                                    selectedPeriod = "Всё время"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                             PeriodButton(
                                 text = "Интервал",
                                 isSelected = selectedPeriod == "Интервал",
-                                onClick = { selectedPeriod = "Интервал" }
+                                onClick = {
+                                    selectedPeriod = "Интервал"
+                                    selectedDate = LocalDate.now()
+                                }
                             )
                         }
                     }
 
-                    // Настройки даты
+                    // Настройки даты (только для периодов "День" и "Интервал")
                     Column(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            "День",
+                            if (selectedPeriod == "День") "День" else
+                                if (selectedPeriod == "Интервал") "Начальная дата" else "Дата",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Medium,
                             color = AppColors.LightColor
@@ -218,7 +256,7 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                                 Spacer(Modifier.width(18.dp))
 
                                 Text(
-                                    selectedDate,
+                                    selectedDate.format(dateFormatter),
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = AppColors.LightColor
@@ -232,7 +270,10 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     IconButton(
-                                        onClick = { /* Предыдущий день */ },
+                                        onClick = {
+                                            // Предыдущий день
+                                            selectedDate = selectedDate.minusDays(1)
+                                        },
                                         modifier = Modifier
                                             .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
                                             .size(20.dp)
@@ -246,7 +287,10 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                                     }
 
                                     IconButton(
-                                        onClick = { /* Следующий день */ },
+                                        onClick = {
+                                            // Следующий день
+                                            selectedDate = selectedDate.plusDays(1)
+                                        },
                                         modifier = Modifier
                                             .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
                                             .size(20.dp)
@@ -271,26 +315,41 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                     .fillMaxSize()
                     .padding(top = 243.dp)
             ) {
-                // Список операций
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    items(state.operations.sortedByDescending { it.date }) { operation ->
-                        TransactionItem(
-                            operation = operation,
-                            onEditClick = { viewModel.showEditOperation(operation) },
-                            onDeleteClick = { operationToDelete = operation }
+                if (filteredOperations.isEmpty()) {
+                    // Сообщение, если операций нет
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Операции не найдены",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = AppColors.LightGreyColor
                         )
-
-                        // Разделитель (кроме последнего элемента)
-                        if (operation != state.operations.sortedByDescending { it.date }.last()) {
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(1.dp),
-                                color = AppColors.LightGreyColor
+                    }
+                } else {
+                    // Список операций
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        items(filteredOperations) { operation ->
+                            TransactionItem(
+                                operation = operation,
+                                onEditClick = { viewModel.showEditOperation(operation) },
+                                onDeleteClick = { operationToDelete = operation }
                             )
+
+                            // Разделитель (кроме последнего элемента)
+                            if (operation != filteredOperations.last()) {
+                                Divider(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(1.dp),
+                                    color = AppColors.LightGreyColor
+                                )
+                            }
                         }
                     }
                 }
@@ -337,6 +396,67 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
             }
         )
     }
+}
+
+/**
+ * Функция фильтрации операций по типу и периоду
+ */
+private fun filterOperations(
+    operations: List<Operation>,
+    filterType: String,
+    period: String,
+    selectedDate: LocalDate
+): List<Operation> {
+    // 1. Фильтрация по типу операции
+    val filteredByType = when (filterType) {
+        "Доходы" -> operations.filter { it.type == "Доход" }
+        "Расходы" -> operations.filter { it.type == "Расход" }
+        else -> operations // "Все"
+    }
+
+    // 2. Фильтрация по периоду времени
+    return when (period) {
+        "День" -> {
+            filteredByType.filter {
+                val opDate = it.date
+                opDate == selectedDate
+            }
+        }
+        "Неделя" -> {
+            val weekStart = selectedDate.minusDays(selectedDate.dayOfWeek.value - 1L)
+            val weekEnd = weekStart.plusDays(6)
+            filteredByType.filter {
+                val opDate = it.date
+                opDate in weekStart..weekEnd
+            }
+        }
+        "Месяц" -> {
+            val monthStart = selectedDate.withDayOfMonth(1)
+            val monthEnd = selectedDate.with(TemporalAdjusters.lastDayOfMonth())
+            filteredByType.filter {
+                val opDate = it.date
+                opDate in monthStart..monthEnd
+            }
+        }
+        "Год" -> {
+            val yearStart = selectedDate.withDayOfYear(1)
+            val yearEnd = selectedDate.with(TemporalAdjusters.lastDayOfYear())
+            filteredByType.filter {
+                val opDate = it.date
+                opDate in yearStart..yearEnd
+            }
+        }
+        "Интервал" -> {
+            // Для интервала используем selectedDate как начальную дату
+            // В реальном приложении нужно добавить выбор конечной даты
+            // Показываем операции только за выбранный день
+            filteredByType.filter {
+                val opDate = it.date
+                opDate == selectedDate
+            }
+        }
+        else -> filteredByType // "Всё время"
+    }.sortedByDescending { it.date } // Сортируем по дате (новые сверху)
 }
 
 @Composable
@@ -471,9 +591,9 @@ fun TransactionItem(
                     )
                     .background(
                         color = if (operation.type == "Доход")
-                            AppColors.GreenColor.copy(alpha = 0.25f) // green с прозрачностью 40% 66
+                            AppColors.GreenColor.copy(alpha = 0.25f)
                         else
-                            AppColors.RedColor.copy(alpha = 0.25f), // red с прозрачностью 40%
+                            AppColors.RedColor.copy(alpha = 0.25f),
                         shape = RoundedCornerShape(10.dp)
                     )
                     .padding(horizontal = 10.dp, vertical = 4.dp),

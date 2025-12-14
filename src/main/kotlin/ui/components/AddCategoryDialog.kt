@@ -14,7 +14,7 @@ import viewmodel.FinanceViewModel
  * @param viewModel ViewModel для управления категориями
  */
 @Composable
-fun CategoryDialog(viewModel: FinanceViewModel) {
+fun AddCategoryDialog(viewModel: FinanceViewModel) {
     var categoryName by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
 
