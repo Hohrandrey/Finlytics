@@ -43,6 +43,8 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
 
     // Форматирование даты для отображения
     val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    val monthYearFormatter = DateTimeFormatter.ofPattern("MM.yyyy")
+    val yearFormatter = DateTimeFormatter.ofPattern("yyyy")
 
     // Функция для фильтрации операций
     val filteredOperations = remember(state.operations, selectedFilter, selectedPeriod, selectedDate) {
@@ -69,6 +71,21 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
             }
         }
         println("======================\n")
+    }
+
+    // Функция для получения отображаемой даты в зависимости от периода
+    val displayDateText = remember(selectedPeriod, selectedDate) {
+        when (selectedPeriod) {
+            "День" -> selectedDate.format(dateFormatter)
+            "Неделя" -> {
+                val weekStart = selectedDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                val weekEnd = weekStart.plusDays(6)
+                "${weekStart.format(dateFormatter)} - ${weekEnd.format(dateFormatter)}"
+            }
+            "Месяц" -> selectedDate.format(monthYearFormatter)
+            "Год" -> selectedDate.format(yearFormatter)
+            else -> ""
+        }
     }
 
     Box(
@@ -159,7 +176,7 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
 
                         // Кнопки периодов
                         Row(
-                            modifier = Modifier.width(390.dp),
+                            modifier = Modifier.width(350.dp),
                             horizontalArrangement = Arrangement.spacedBy(20.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -190,7 +207,7 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                         }
 
                         Row(
-                            modifier = Modifier.width(390.dp),
+                            modifier = Modifier.width(350.dp),
                             horizontalArrangement = Arrangement.spacedBy(20.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -207,104 +224,112 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
                                 isSelected = selectedPeriod == "Всё время",
                                 onClick = {
                                     selectedPeriod = "Всё время"
-                                    selectedDate = LocalDate.now()
-                                }
-                            )
-                            PeriodButton(
-                                text = "Интервал",
-                                isSelected = selectedPeriod == "Интервал",
-                                onClick = {
-                                    selectedPeriod = "Интервал"
-                                    selectedDate = LocalDate.now()
                                 }
                             )
                         }
                     }
 
-                    // Настройки даты (только для периодов "День" и "Интервал")
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            if (selectedPeriod == "День") "День" else
-                                if (selectedPeriod == "Интервал") "Начальная дата" else "Дата",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = AppColors.LightColor
-                        )
-
-                        // Поле ввода даты
-                        Box(
-                            modifier = Modifier
-                                .width(390.dp)
-                                .height(42.dp)
-                                .background(AppColors.LightGreyColor, RoundedCornerShape(10.dp))
+                    // Настройки даты (скрываем для "Всё время")
+                    if (selectedPeriod != "Всё время") {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(15.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalAlignment = Alignment.CenterVertically
+                            Text(
+                                selectedPeriod, // Подпись соответствует выбранному периоду
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = AppColors.LightColor
+                            )
+
+                            // Поле ввода даты
+                            Box(
+                                modifier = Modifier
+                                    .width(390.dp)
+                                    .height(42.dp)
+                                    .background(AppColors.LightGreyColor, RoundedCornerShape(10.dp))
                             ) {
-                                Spacer(Modifier.width(16.dp))
-
-                                Icon(
-                                    imageVector = FinlyticsIconPack.Date,
-                                    contentDescription = "date",
-                                    modifier = Modifier.size(18.dp),
-                                    tint = AppColors.LightColor
-                                )
-
-                                Spacer(Modifier.width(18.dp))
-
-                                Text(
-                                    selectedDate.format(dateFormatter),
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = AppColors.LightColor
-                                )
-
-                                Spacer(Modifier.weight(1f))
-
                                 Row(
-                                    modifier = Modifier.padding(end = 6.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.fillMaxSize(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    IconButton(
-                                        onClick = {
-                                            // Предыдущий день
-                                            selectedDate = selectedDate.minusDays(1)
-                                        },
-                                        modifier = Modifier
-                                            .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
-                                            .size(20.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = FinlyticsIconPack.Left,
-                                            contentDescription = "previous_day",
-                                            modifier = Modifier.size(20.dp),
-                                            tint = AppColors.LightColor
-                                        )
-                                    }
+                                    Spacer(Modifier.width(16.dp))
 
-                                    IconButton(
-                                        onClick = {
-                                            // Следующий день
-                                            selectedDate = selectedDate.plusDays(1)
-                                        },
-                                        modifier = Modifier
-                                            .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
-                                            .size(20.dp)
+                                    Icon(
+                                        imageVector = FinlyticsIconPack.Date,
+                                        contentDescription = "date",
+                                        modifier = Modifier.size(18.dp),
+                                        tint = AppColors.LightColor
+                                    )
+
+                                    Spacer(Modifier.width(18.dp))
+
+                                    Text(
+                                        displayDateText,
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        color = AppColors.LightColor
+                                    )
+
+                                    Spacer(Modifier.weight(1f))
+
+                                    // Кнопки навигации показываем только для День/Неделя/Месяц/Год
+                                    Row(
+                                        modifier = Modifier.padding(end = 6.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(
-                                            imageVector = FinlyticsIconPack.Right,
-                                            contentDescription = "next_day",
-                                            modifier = Modifier.size(20.dp),
-                                            tint = AppColors.LightColor
-                                        )
+                                        IconButton(
+                                            onClick = {
+                                                // Предыдущий период
+                                                selectedDate = when (selectedPeriod) {
+                                                    "День" -> selectedDate.minusDays(1)
+                                                    "Неделя" -> selectedDate.minusWeeks(1)
+                                                    "Месяц" -> selectedDate.minusMonths(1)
+                                                    "Год" -> selectedDate.minusYears(1)
+                                                    else -> selectedDate
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
+                                                .size(20.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = FinlyticsIconPack.Left,
+                                                contentDescription = "previous_period",
+                                                modifier = Modifier.size(20.dp),
+                                                tint = AppColors.LightColor
+                                            )
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                // Следующий период
+                                                selectedDate = when (selectedPeriod) {
+                                                    "День" -> selectedDate.plusDays(1)
+                                                    "Неделя" -> selectedDate.plusWeeks(1)
+                                                    "Месяц" -> selectedDate.plusMonths(1)
+                                                    "Год" -> selectedDate.plusYears(1)
+                                                    else -> selectedDate
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .background(AppColors.BlueColor, RoundedCornerShape(5.dp))
+                                                .size(20.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = FinlyticsIconPack.Right,
+                                                contentDescription = "next_period",
+                                                modifier = Modifier.size(20.dp),
+                                                tint = AppColors.LightColor
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
+                    } else {
+                        // Пустой колонка для выравнивания, когда поле даты скрыто
+                        Spacer(modifier = Modifier.width(390.dp))
                     }
                 }
             }
@@ -417,13 +442,10 @@ private fun filterOperations(
     // 2. Фильтрация по периоду времени
     return when (period) {
         "День" -> {
-            filteredByType.filter {
-                val opDate = it.date
-                opDate == selectedDate
-            }
+            filteredByType.filter { it.date == selectedDate }
         }
         "Неделя" -> {
-            val weekStart = selectedDate.minusDays(selectedDate.dayOfWeek.value - 1L)
+            val weekStart = selectedDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
             val weekEnd = weekStart.plusDays(6)
             filteredByType.filter {
                 val opDate = it.date
@@ -450,10 +472,7 @@ private fun filterOperations(
             // Для интервала используем selectedDate как начальную дату
             // В реальном приложении нужно добавить выбор конечной даты
             // Показываем операции только за выбранный день
-            filteredByType.filter {
-                val opDate = it.date
-                opDate == selectedDate
-            }
+            filteredByType.filter { it.date == selectedDate }
         }
         else -> filteredByType // "Всё время"
     }.sortedByDescending { it.date } // Сортируем по дате (новые сверху)
