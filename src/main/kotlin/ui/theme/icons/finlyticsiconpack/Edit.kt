@@ -15,6 +15,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Редактировать".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 28x28 dp.
+ */
 public val FinlyticsIconPack.Edit: ImageVector
     get() {
         if (_edit != null) {

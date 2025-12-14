@@ -14,6 +14,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Плюс".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 17x17 dp.
+ */
 public val FinlyticsIconPack.Plus: ImageVector
     get() {
         if (_plus != null) {

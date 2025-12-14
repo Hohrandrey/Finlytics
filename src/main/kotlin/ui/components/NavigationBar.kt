@@ -21,6 +21,12 @@ import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
+/**
+ * Навигационная панель приложения.
+ * Отображает кнопки для переключения между основными экранами приложения.
+ *
+ * @param viewModel ViewModel для управления навигацией и состоянием
+ */
 @Composable
 fun NavigationBar(viewModel: FinanceViewModel) {
     val currentScreen = viewModel.currentScreen
@@ -69,6 +75,15 @@ fun NavigationBar(viewModel: FinanceViewModel) {
     }
 }
 
+/**
+ * Компонент кнопки навигации.
+ * Отображает иконку и, при активном состоянии, текст кнопки.
+ *
+ * @param text Текст кнопки
+ * @param isSelected Флаг активности кнопки
+ * @param onClick Обработчик нажатия на кнопку
+ * @param Icon Векторное изображение иконки
+ */
 @Composable
 fun NavigationButton(
     text: String,

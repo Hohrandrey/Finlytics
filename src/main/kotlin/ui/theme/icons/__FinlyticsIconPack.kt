@@ -18,8 +18,15 @@ import ui.theme.icons.finlyticsiconpack.Statistic
 import ui.theme.icons.finlyticsiconpack.Wallet
 import kotlin.collections.List as ____KtList
 
+/**
+ * Объект-контейнер для пользовательских векторных иконок приложения Finlytics.
+ * Предоставляет доступ ко всем иконкам, используемым в пользовательском интерфейсе.
+ */
 public object FinlyticsIconPack
 
+/**
+ * Список всех доступных векторных иконок в пакете.
+ */
 private var __AllIcons: ____KtList<ImageVector>? = null
 
 public val FinlyticsIconPack.AllIcons: ____KtList<ImageVector>

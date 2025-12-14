@@ -11,6 +11,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Минус".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 17x3 dp.
+ */
 public val FinlyticsIconPack.Minus: ImageVector
     get() {
         if (_minus != null) {

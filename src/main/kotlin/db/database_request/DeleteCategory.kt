@@ -2,9 +2,19 @@ package db.database_request
 
 import java.sql.DriverManager
 
+/**
+ * Объект для удаления категорий из базы данных.
+ * Предоставляет функции удаления категорий доходов и расходов по идентификатору.
+ */
 object DeleteCategory {
     private val DB_URL = DatabaseConfig.DB_URL
 
+    /**
+     * Удаляет категорию доходов по её идентификатору.
+     *
+     * @param categoryId Идентификатор удаляемой категории доходов
+     * @return true если категория успешно удалена, false в случае ошибки
+     */
     fun deleteIncomeCategory(categoryId: Int): Boolean {
         if (categoryId <= 0) return false
         val sql = "DELETE FROM Income_categories WHERE id_income_category = ?"
@@ -24,6 +34,12 @@ object DeleteCategory {
         }
     }
 
+    /**
+     * Удаляет категорию расходов по её идентификатору.
+     *
+     * @param categoryId Идентификатор удаляемой категории расходов
+     * @return true если категория успешно удалена, false в случае ошибки
+     */
     fun deleteExpensesCategory(categoryId: Int): Boolean {
         if (categoryId <= 0) return false
         val sql = "DELETE FROM expenses_categories WHERE id_expenses_category = ?"

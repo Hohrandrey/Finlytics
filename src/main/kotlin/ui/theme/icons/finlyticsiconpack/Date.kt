@@ -11,6 +11,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Дата".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 18x20 dp.
+ */
 public val FinlyticsIconPack.Date: ImageVector
     get() {
         if (_date != null) {

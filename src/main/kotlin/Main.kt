@@ -17,6 +17,10 @@ import ui.components.OperationDialog
 import utils.LoggingConfig
 import viewmodel.FinanceViewModel
 
+/**
+ * Предварительный просмотр приложения для Compose Preview.
+ * Используется при разработке для предварительного просмотра UI.
+ */
 @Composable
 @Preview
 fun AppPreview() {

@@ -11,6 +11,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Закрыть".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 19x19 dp.
+ */
 public val FinlyticsIconPack.Close: ImageVector
     get() {
         if (_close != null) {

@@ -13,6 +13,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Удалить".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 28x28 dp.
+ */
 public val FinlyticsIconPack.Delete: ImageVector
     get() {
         if (_delete != null) {

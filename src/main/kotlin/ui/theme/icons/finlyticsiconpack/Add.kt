@@ -14,6 +14,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Добавить".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 28x28 dp.
+ */
 public val FinlyticsIconPack.Add: ImageVector
     get() {
         if (_add != null) {

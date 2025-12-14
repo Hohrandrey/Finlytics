@@ -28,7 +28,13 @@ import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
-
+/**
+ * Экран истории операций.
+ * Отображает список финансовых операций с возможностью фильтрации по типу и периоду.
+ * Предоставляет функции редактирования и удаления операций.
+ *
+ * @param viewModel ViewModel для управления данными операций
+ */
 @Composable
 fun HistoryScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
@@ -420,6 +426,15 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
     }
 }
 
+/**
+ * Фильтрует список операций по заданным параметрам.
+ *
+ * @param operations Исходный список операций
+ * @param filterType Тип фильтра ("Все", "Доходы", "Расходы")
+ * @param period Временной период ("День", "Неделя", "Месяц", "Год", "Всё время")
+ * @param selectedDate Базовая дата для фильтрации
+ * @return Отфильтрованный список операций
+ */
 private fun filterOperations(
     operations: List<Operation>,
     filterType: String,
@@ -466,6 +481,9 @@ private fun filterOperations(
     }.sortedByDescending { it.date }
 }
 
+/**
+ * Компонент кнопки фильтра по типу операции.
+ */
 @Composable
 private fun FilterButton(
     text: String,
@@ -527,6 +545,9 @@ private fun FilterButton(
     }
 }
 
+/**
+ * Компонент кнопки выбора временного периода.
+ */
 @Composable
 private fun PeriodButton(
     text: String,
@@ -551,6 +572,10 @@ private fun PeriodButton(
     }
 }
 
+/**
+ * Компонент элемента списка операций.
+ * Отображает информацию об операции и кнопки действий.
+ */
 @Composable
 private fun TransactionItem(
     operation: Operation,

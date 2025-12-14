@@ -28,7 +28,13 @@ import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
-
+/**
+ * Экран обзора финансовой статистики.
+ * Отображает круговую диаграмму распределения расходов/доходов,
+ * финансовую сводку (баланс, доходы, расходы) и список категорий.
+ *
+ * @param viewModel ViewModel для управления финансовыми данными
+ */
 @Composable
 fun OverviewScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
@@ -731,6 +737,9 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
     }
 }
 
+/**
+ * Фильтрует операции по временному периоду.
+ */
 private fun filterOperationsByPeriod(
     operations: List<models.Operation>,
     period: String,
@@ -768,6 +777,9 @@ private fun filterOperationsByPeriod(
     }.sortedByDescending { it.date }
 }
 
+/**
+ * Фильтрует операции по типу и временному периоду.
+ */
 private fun filterOperationsByType(
     operations: List<models.Operation>,
     filterType: String,

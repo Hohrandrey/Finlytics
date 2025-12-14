@@ -11,6 +11,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Расходы".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 24x16 dp.
+ */
 public val FinlyticsIconPack.Expenses: ImageVector
     get() {
         if (_expenses != null) {

@@ -2,9 +2,20 @@ package db.database_request
 
 import java.sql.DriverManager
 
+/**
+ * Объект для управления категориями в базе данных.
+ * Предоставляет функции добавления категорий доходов и расходов.
+ */
 object AddCategory {
     private val DB_URL = DatabaseConfig.DB_URL
 
+    /**
+     * Добавляет новую категорию доходов в базу данных.
+     * Валидирует входные данные и логирует процесс выполнения.
+     *
+     * @param name Название категории доходов
+     * @return true если категория успешно добавлена, false в случае ошибки
+     */
     fun addIncomeCategory(name: String): Boolean {
         println("Добавление категории доходов: '$name'")
         if (name.isBlank()) {
@@ -30,6 +41,13 @@ object AddCategory {
         }
     }
 
+    /**
+     * Добавляет новую категорию расходов в базу данных.
+     * Валидирует входные данные и логирует процесс выполнения.
+     *
+     * @param name Название категории расходов
+     * @return true если категория успешно добавлена, false в случае ошибки
+     */
     fun addExpensesCategory(name: String): Boolean {
         println("Добавление категории расходов: '$name'")
         if (name.isBlank()) {

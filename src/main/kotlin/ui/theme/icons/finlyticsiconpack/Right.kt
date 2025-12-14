@@ -13,6 +13,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Векторное изображение иконки "Вправо".
+ * Используется в пользовательском интерфейсе приложения Finlytics.
+ * Размер по умолчанию: 20x20 dp.
+ */
 public val FinlyticsIconPack.Right: ImageVector
     get() {
         if (_right != null) {
