@@ -1,11 +1,30 @@
 package db.database_request
 
 import java.sql.DriverManager
+import java.io.File
 
+/**
+ * Инициализатор базы данных. Создает таблицы при первом запуске приложения.
+ * Добавляет категории по умолчанию.
+ */
 object DatabaseInitializer {
-    private const val DB_URL = "jdbc:sqlite:src/main/kotlin/db/database/Finlytics.db"
+    // Используем конфигурацию для получения пути к БД
+    private val DB_URL = DatabaseConfig.DB_URL
 
+    init {
+        // Создаем директорию для базы данных, если ее нет
+        val dbFile = File("src/main/kotlin/db/database/Finlytics.db")
+        dbFile.parentFile.mkdirs()
+        println("Путь к БД: ${dbFile.absolutePath}")
+        println("БД существует: ${dbFile.exists()}")
+    }
+
+    /**
+     * Создает все необходимые таблицы в базе данных, если они не существуют.
+     * Выполняется при каждом запуске приложения для обеспечения целостности схемы БД.
+     */
     fun createTablesIfNotExist() {
+        // SQL-запросы для создания таблиц
         val sql = """
             CREATE TABLE IF NOT EXISTS Income_categories (
                 id_income_category INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,14 +54,39 @@ object DatabaseInitializer {
 
         try {
             DriverManager.getConnection(DB_URL).use { conn ->
+                println("\n=== DATABASE INITIALIZATION ===")
+                println("Подключение к БД успешно: $DB_URL")
+
+                // Проверяем существующие таблицы
+                val metaData = conn.metaData
+                val tables = metaData.getTables(null, null, "%", null)
+                println("Существующие таблицы в БД:")
+                while (tables.next()) {
+                    println("  - ${tables.getString("TABLE_NAME")}")
+                }
+                tables.close()
+
                 conn.createStatement().use { stmt ->
+                    // Выполняем каждый запрос отдельно (разделены точкой с запятой)
                     sql.split(";").forEach { query ->
-                        if (query.trim().isNotEmpty()) stmt.execute(query.trim())
+                        if (query.trim().isNotEmpty()) {
+                            stmt.execute(query.trim())
+                            println("Выполнен запрос: ${query.trim().take(50)}...")
+                        }
                     }
                 }
+                println("Таблицы созданы/проверены успешно")
+                println("===============================\n")
+
+                // Добавляем категории по умолчанию
+                DefaultCategories.initializeDefaultCategories()
             }
         } catch (e: Exception) {
-            println("Ошибка инициализации БД: ${e.message}")
+            println("\n!!! ОШИБКА ИНИЦИАЛИЗАЦИИ БД !!!")
+            println("Сообщение: ${e.message}")
+            println("Трассировка:")
+            e.printStackTrace()
+            println("=================================\n")
         }
     }
 }
