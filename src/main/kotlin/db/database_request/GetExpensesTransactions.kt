@@ -5,6 +5,9 @@ import java.sql.DriverManager
 /**
  * Объект для получения транзакций расходов из базы данных.
  * Выполняет JOIN с таблицей категорий для получения полной информации.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object GetExpensesTransactions {
     private val DB_URL = DatabaseConfig.DB_URL

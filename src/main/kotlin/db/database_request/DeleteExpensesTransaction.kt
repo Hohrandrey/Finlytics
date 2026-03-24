@@ -4,6 +4,10 @@ import java.sql.DriverManager
 
 /**
  * Объект для удаления транзакций расходов из базы данных.
+ * Выполняет операцию DELETE для таблицы expenses_transactions.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object DeleteExpensesTransaction {
     private val DB_URL = DatabaseConfig.DB_URL

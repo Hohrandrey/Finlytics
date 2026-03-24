@@ -4,6 +4,10 @@ import java.sql.DriverManager
 
 /**
  * Объект для обновления транзакций расходов в базе данных.
+ * Выполняет операцию UPDATE для таблицы expenses_transactions.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object UpdateExpensesTransaction {
     private val DB_URL = DatabaseConfig.DB_URL

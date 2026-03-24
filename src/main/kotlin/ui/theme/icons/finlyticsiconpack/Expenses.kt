@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap.Companion.Round
-import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.StrokeJoin.Companion.Round as StrokeJoinRound
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
@@ -12,9 +12,12 @@ import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
 /**
- * Векторное изображение иконки "Расходы".
- * Используется в пользовательском интерфейсе приложения Finlytics.
- * Размер по умолчанию: 24x16 dp.
+ * Иконка "Расходы" - стилизованная стрелка вниз.
+ * Используется для обозначения расходов в фильтрах и статистике.
+ *
+ * Размер: 24x16 dp
+ * Цвет: светлый (#F4F4F4)
+ * Стиль: контурная иконка с закругленными краями
  */
 public val FinlyticsIconPack.Expenses: ImageVector
     get() {
@@ -22,10 +25,10 @@ public val FinlyticsIconPack.Expenses: ImageVector
             return _expenses!!
         }
         _expenses = Builder(name = "Expenses", defaultWidth = 24.0.dp, defaultHeight = 16.0.dp,
-                viewportWidth = 24.0f, viewportHeight = 16.0f).apply {
+            viewportWidth = 24.0f, viewportHeight = 16.0f).apply {
             path(fill = SolidColor(Color(0x00000000)), stroke = SolidColor(Color(0xFFF4F4F4)),
-                    strokeLineWidth = 2.0f, strokeLineCap = Round, strokeLineJoin =
-                    StrokeJoin.Companion.Round, strokeLineMiter = 4.0f, pathFillType = NonZero) {
+                strokeLineWidth = 2.0f, strokeLineCap = Round, strokeLineJoin = StrokeJoinRound,
+                strokeLineMiter = 4.0f, pathFillType = NonZero) {
                 moveTo(23.0f, 15.0f)
                 lineTo(14.962f, 6.688f)
                 curveTo(14.817f, 6.538f, 14.744f, 6.463f, 14.68f, 6.405f)
@@ -41,7 +44,7 @@ public val FinlyticsIconPack.Expenses: ImageVector
                 horizontalLineTo(14.75f)
             }
         }
-        .build()
+            .build()
         return _expenses!!
     }
 

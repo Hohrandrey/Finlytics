@@ -19,22 +19,43 @@ import ui.theme.icons.finlyticsiconpack.Wallet
 import kotlin.collections.List as ____KtList
 
 /**
- * Объект-контейнер для пользовательских векторных иконок приложения Finlytics.
- * Предоставляет доступ ко всем иконкам, используемым в пользовательском интерфейсе.
+ * Объект-контейнер для всех векторных иконок приложения "Finlytics".
+ * Предоставляет доступ к коллекции всех иконок через свойство AllIcons.
+ *
+ * Доступные иконки:
+ * - Add - иконка добавления (плюс)
+ * - Close - иконка закрытия (крестик)
+ * - Date - иконка календаря
+ * - Delete - иконка удаления (корзина)
+ * - Edit - иконка редактирования (карандаш)
+ * - Expenses - иконка расходов (стрелка вниз)
+ * - History - иконка истории (документ)
+ * - Income - иконка доходов (стрелка вверх)
+ * - Left - иконка навигации влево (стрелка)
+ * - Minus - иконка минуса
+ * - Plus - иконка плюса
+ * - Right - иконка навигации вправо (стрелка)
+ * - Settings - иконка настроек (шестеренка)
+ * - Statistic - иконка статистики (график)
+ * - Wallet - иконка кошелька
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 public object FinlyticsIconPack
 
-/**
- * Список всех доступных векторных иконок в пакете.
- */
 private var __AllIcons: ____KtList<ImageVector>? = null
 
+/**
+ * Список всех доступных иконок в приложении.
+ * Используется для превью и отладки.
+ */
 public val FinlyticsIconPack.AllIcons: ____KtList<ImageVector>
   get() {
     if (__AllIcons != null) {
       return __AllIcons!!
     }
     __AllIcons= listOf(Add, Close, Date, Delete, Edit, Expenses, History, Income, Left, Minus, Plus,
-        Right, Settings, Statistic, Wallet)
+      Right, Settings, Statistic, Wallet)
     return __AllIcons!!
   }

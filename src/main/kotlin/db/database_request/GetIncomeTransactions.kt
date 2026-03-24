@@ -5,6 +5,9 @@ import java.sql.DriverManager
 /**
  * Объект для получения транзакций доходов из базы данных.
  * Выполняет JOIN с таблицей категорий для получения полной информации.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object GetIncomeTransactions {
     private val DB_URL = DatabaseConfig.DB_URL

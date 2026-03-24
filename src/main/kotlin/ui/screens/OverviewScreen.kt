@@ -29,11 +29,16 @@ import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
 /**
- * Экран обзора финансовой статистики.
- * Отображает круговую диаграмму распределения расходов/доходов,
- * финансовую сводку (баланс, доходы, расходы) и список категорий.
+ * Главный экран "Обзор" приложения.
+ * Отображает статистику доходов и расходов, круговую диаграмму распределения,
+ * а также список категорий с процентным соотношением.
  *
- * @param viewModel ViewModel для управления финансовыми данными
+ * Поддерживает фильтрацию по:
+ * - Типу операций (Доходы/Расходы)
+ * - Временному периоду (День/Неделя/Месяц/Год/Всё время)
+ * - Конкретной дате (для выбранного периода)
+ *
+ * @param viewModel ViewModel для управления данными
  */
 @Composable
 fun OverviewScreen(viewModel: FinanceViewModel) {
@@ -49,7 +54,9 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
     val monthYearFormatter = DateTimeFormatter.ofPattern("MM.yyyy")
     val yearFormatter = DateTimeFormatter.ofPattern("yyyy")
 
-    // Функция для фильтрации операций по периоду (все операции за период)
+    /**
+     * Функция для фильтрации операций по периоду (все операции за период)
+     */
     val allOperationsForPeriod = remember(state.operations, selectedPeriod, selectedDate) {
         filterOperationsByPeriod(
             operations = state.operations,
@@ -58,7 +65,9 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
         )
     }
 
-    // Функция для фильтрации операций по типу и периоду (для диаграммы)
+    /**
+     * Функция для фильтрации операций по типу и периоду (для диаграммы)
+     */
     val filteredOperationsByType = remember(state.operations, selectedFilter, selectedPeriod, selectedDate) {
         filterOperationsByType(
             operations = state.operations,
@@ -739,6 +748,11 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
 /**
  * Фильтрует операции по временному периоду.
+ *
+ * @param operations Список операций
+ * @param period Выбранный период ("День", "Неделя", "Месяц", "Год", "Всё время")
+ * @param selectedDate Опорная дата для фильтрации
+ * @return Отфильтрованный список операций
  */
 private fun filterOperationsByPeriod(
     operations: List<models.Operation>,
@@ -779,6 +793,12 @@ private fun filterOperationsByPeriod(
 
 /**
  * Фильтрует операции по типу и временному периоду.
+ *
+ * @param operations Список операций
+ * @param filterType Тип фильтрации ("Доходы", "Расходы", "Все")
+ * @param period Выбранный период
+ * @param selectedDate Опорная дата для фильтрации
+ * @return Отфильтрованный список операций
  */
 private fun filterOperationsByType(
     operations: List<models.Operation>,
@@ -826,6 +846,17 @@ private fun filterOperationsByType(
     }.sortedByDescending { it.date }
 }
 
+/**
+ * Кнопка фильтрации по типу операций.
+ *
+ * @param text Текст кнопки
+ * @param isSelected Активна ли кнопка
+ * @param modifier Модификатор
+ * @param icon Отображать ли иконку
+ * @param isAll Является ли кнопка универсальной (для всех типов)
+ * @param isIncome Тип для иконки (доходы/расходы)
+ * @param onClick Callback при нажатии
+ */
 @Composable
 private fun FilterButton(
     text: String,
@@ -887,6 +918,13 @@ private fun FilterButton(
     }
 }
 
+/**
+ * Кнопка выбора временного периода.
+ *
+ * @param text Текст периода
+ * @param isSelected Активна ли кнопка
+ * @param onClick Callback при нажатии
+ */
 @Composable
 private fun PeriodButton(
     text: String,

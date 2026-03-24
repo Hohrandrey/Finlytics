@@ -4,6 +4,10 @@ import java.sql.DriverManager
 
 /**
  * Объект для удаления транзакций доходов из базы данных.
+ * Выполняет операцию DELETE для таблицы Income_transactions.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object DeleteIncomeTransaction {
     private val DB_URL = DatabaseConfig.DB_URL
