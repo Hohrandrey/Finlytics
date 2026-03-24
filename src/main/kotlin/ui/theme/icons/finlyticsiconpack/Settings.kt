@@ -14,6 +14,14 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Иконка "Настройки" - стилизованная шестеренка с кружком внутри.
+ * Используется для навигации на экран управления категориями и настройками.
+ *
+ * Размер: 28x28 dp
+ * Цвет: светлый (#F4F4F4)
+ * Стиль: заливка для основной формы, контур для шестеренки
+ */
 public val FinlyticsIconPack.Settings: ImageVector
     get() {
         if (_settings != null) {

@@ -11,21 +11,29 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Иконка "Минус" - горизонтальная черта.
+ * Используется для обозначения вычитания или отрицательного значения.
+ *
+ * Размер: 17x3 dp
+ * Цвет: светлый (#F4F4F4)
+ * Стиль: контурная иконка с закругленными краями
+ */
 public val FinlyticsIconPack.Minus: ImageVector
     get() {
         if (_minus != null) {
             return _minus!!
         }
         _minus = Builder(name = "Minus", defaultWidth = 17.0.dp, defaultHeight = 3.0.dp,
-                viewportWidth = 17.0f, viewportHeight = 3.0f).apply {
+            viewportWidth = 17.0f, viewportHeight = 3.0f).apply {
             path(fill = SolidColor(Color(0x00000000)), stroke = SolidColor(Color(0xFFF4F4F4)),
-                    strokeLineWidth = 3.0f, strokeLineCap = Round, strokeLineJoin = Miter,
-                    strokeLineMiter = 4.0f, pathFillType = NonZero) {
+                strokeLineWidth = 3.0f, strokeLineCap = Round, strokeLineJoin = Miter,
+                strokeLineMiter = 4.0f, pathFillType = NonZero) {
                 moveTo(1.5f, 1.5f)
                 lineTo(15.5f, 1.5f)
             }
         }
-        .build()
+            .build()
         return _minus!!
     }
 

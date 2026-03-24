@@ -1,30 +1,36 @@
 package ui.theme.icons.finlyticsiconpack
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
 import androidx.compose.ui.graphics.StrokeCap.Companion.Round
-import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
+import androidx.compose.ui.graphics.StrokeJoin.Companion.Round as StrokeJoinRound
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import ui.theme.icons.FinlyticsIconPack
 
+/**
+ * Иконка "Редактировать" - стилизованный карандаш.
+ * Используется для кнопок редактирования операций и категорий.
+ *
+ * Размер: 28x28 dp
+ * Цвет: светлый (#F4F4F4)
+ * Стиль: контурная иконка с закругленными краями
+ */
 public val FinlyticsIconPack.Edit: ImageVector
     get() {
         if (_edit != null) {
             return _edit!!
         }
         _edit = Builder(name = "Edit", defaultWidth = 28.0.dp, defaultHeight = 28.0.dp,
-                viewportWidth = 28.0f, viewportHeight = 28.0f).apply {
+            viewportWidth = 28.0f, viewportHeight = 28.0f).apply {
             path(fill = SolidColor(Color(0x00000000)), stroke = SolidColor(Color(0xFFF4F4F4)),
-                    strokeLineWidth = 2.0f, strokeLineCap = Round, strokeLineJoin = Miter,
-                    strokeLineMiter = 4.0f, pathFillType = NonZero) {
+                strokeLineWidth = 2.0f, strokeLineCap = Round, strokeLineJoin = Miter,
+                strokeLineMiter = 4.0f, pathFillType = NonZero) {
                 moveTo(21.784f, 14.7f)
                 verticalLineTo(17.512f)
                 curveTo(21.784f, 20.274f, 19.545f, 22.512f, 16.784f, 22.512f)
@@ -35,8 +41,8 @@ public val FinlyticsIconPack.Edit: ImageVector
                 horizontalLineTo(13.972f)
             }
             path(fill = SolidColor(Color(0x00000000)), stroke = SolidColor(Color(0xFFF4F4F4)),
-                    strokeLineWidth = 2.0f, strokeLineCap = Butt, strokeLineJoin = Miter,
-                    strokeLineMiter = 4.0f, pathFillType = NonZero) {
+                strokeLineWidth = 2.0f, strokeLineCap = Butt, strokeLineJoin = Miter,
+                strokeLineMiter = 4.0f, pathFillType = NonZero) {
                 moveTo(18.275f, 6.455f)
                 curveTo(19.055f, 5.674f, 20.321f, 5.673f, 21.102f, 6.454f)
                 lineTo(22.024f, 7.376f)
@@ -51,13 +57,13 @@ public val FinlyticsIconPack.Edit: ImageVector
                 close()
             }
             path(fill = SolidColor(Color(0x00000000)), stroke = SolidColor(Color(0xFFF4F4F4)),
-                    strokeLineWidth = 2.0f, strokeLineCap = Round, strokeLineJoin =
-                    StrokeJoin.Companion.Round, strokeLineMiter = 4.0f, pathFillType = NonZero) {
+                strokeLineWidth = 2.0f, strokeLineCap = Round, strokeLineJoin = StrokeJoinRound,
+                strokeLineMiter = 4.0f, pathFillType = NonZero) {
                 moveTo(17.209f, 7.642f)
                 lineTo(20.694f, 11.126f)
             }
         }
-        .build()
+            .build()
         return _edit!!
     }
 

@@ -4,6 +4,10 @@ import java.sql.DriverManager
 
 /**
  * Объект для получения категорий доходов из базы данных.
+ * Предоставляет методы для получения списка категорий и поиска по имени.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object GetIncomeCategories {
     private val DB_URL = DatabaseConfig.DB_URL

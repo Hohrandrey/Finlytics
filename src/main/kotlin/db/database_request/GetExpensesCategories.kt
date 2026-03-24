@@ -4,6 +4,10 @@ import java.sql.DriverManager
 
 /**
  * Объект для получения категорий расходов из базы данных.
+ * Предоставляет методы для получения списка категорий и поиска по имени.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object GetExpensesCategories {
     private val DB_URL = DatabaseConfig.DB_URL

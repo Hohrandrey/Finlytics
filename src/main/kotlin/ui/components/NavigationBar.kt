@@ -21,6 +21,18 @@ import ui.theme.icons.FinlyticsIconPack
 import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
+/**
+ * Нижняя навигационная панель приложения.
+ * Содержит кнопки для переключения между основными экранами и добавления новой операции.
+ *
+ * Кнопки:
+ * - Добавить - открывает диалог создания новой операции
+ * - Обзор - переход на главный экран со статистикой
+ * - История - переход на экран истории операций
+ * - Настройки - переход на экран управления категориями
+ *
+ * @param viewModel ViewModel для управления навигацией и состоянием
+ */
 @Composable
 fun NavigationBar(viewModel: FinanceViewModel) {
     val currentScreen = viewModel.currentScreen
@@ -69,6 +81,15 @@ fun NavigationBar(viewModel: FinanceViewModel) {
     }
 }
 
+/**
+ * Отдельная кнопка в навигационной панели.
+ * При выборе кнопки отображается только иконка, а при активном состоянии - также текст.
+ *
+ * @param text Текст кнопки
+ * @param isSelected Активна ли кнопка (соответствует текущему экрану)
+ * @param onClick Callback при нажатии
+ * @param Icon Иконка кнопки
+ */
 @Composable
 fun NavigationButton(
     text: String,

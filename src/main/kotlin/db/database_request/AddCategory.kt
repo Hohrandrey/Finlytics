@@ -2,9 +2,22 @@ package db.database_request
 
 import java.sql.DriverManager
 
+/**
+ * Объект для добавления новых категорий в базу данных.
+ * Поддерживает добавление как категорий доходов, так и категорий расходов.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
+ */
 object AddCategory {
     private val DB_URL = DatabaseConfig.DB_URL
 
+    /**
+     * Добавляет новую категорию доходов в таблицу Income_categories.
+     *
+     * @param name Название категории (не должно быть пустым)
+     * @return true если категория успешно добавлена, false в случае ошибки или пустого имени
+     */
     fun addIncomeCategory(name: String): Boolean {
         println("Добавление категории доходов: '$name'")
         if (name.isBlank()) {
@@ -30,6 +43,12 @@ object AddCategory {
         }
     }
 
+    /**
+     * Добавляет новую категорию расходов в таблицу expenses_categories.
+     *
+     * @param name Название категории (не должно быть пустым)
+     * @return true если категория успешно добавлена, false в случае ошибки или пустого имени
+     */
     fun addExpensesCategory(name: String): Boolean {
         println("Добавление категории расходов: '$name'")
         if (name.isBlank()) {

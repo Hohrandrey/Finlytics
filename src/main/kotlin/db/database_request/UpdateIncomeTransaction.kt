@@ -4,6 +4,10 @@ import java.sql.DriverManager
 
 /**
  * Объект для обновления транзакций доходов в базе данных.
+ * Выполняет операцию UPDATE для таблицы Income_transactions.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object UpdateIncomeTransaction {
     private val DB_URL = DatabaseConfig.DB_URL
