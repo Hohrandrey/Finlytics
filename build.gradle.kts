@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "1.9.24"
     id("org.jetbrains.compose") version "1.6.11"
+    id("org.jetbrains.dokka") version "1.9.20"
 }
 
 group = "com.finlytics"
@@ -18,20 +19,10 @@ kotlin {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions.jvmTarget = "21"
-    kotlinOptions.freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn")
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
-}
-
-tasks.withType<Test> {
-    systemProperty("file.encoding", "UTF-8")
-}
-
-tasks.withType<JavaExec> {
-    systemProperty("file.encoding", "UTF-8")
 }
 
 dependencies {
