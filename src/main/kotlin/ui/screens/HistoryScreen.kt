@@ -29,11 +29,16 @@ import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
 /**
- * Экран истории операций.
- * Отображает список финансовых операций с возможностью фильтрации по типу и периоду.
- * Предоставляет функции редактирования и удаления операций.
+ * Экран "История" приложения.
+ * Отображает список всех финансовых операций с возможностью фильтрации.
  *
- * @param viewModel ViewModel для управления данными операций
+ * Поддерживает:
+ * - Фильтрацию по типу операций (Все/Доходы/Расходы)
+ * - Фильтрацию по временному периоду (День/Неделя/Месяц/Год/Всё время)
+ * - Редактирование операции
+ * - Удаление операции с подтверждением
+ *
+ * @param viewModel ViewModel для управления данными
  */
 @Composable
 fun HistoryScreen(viewModel: FinanceViewModel) {
@@ -427,13 +432,13 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
 }
 
 /**
- * Фильтрует список операций по заданным параметрам.
+ * Фильтрует операции по типу и временному периоду.
  *
- * @param operations Исходный список операций
- * @param filterType Тип фильтра ("Все", "Доходы", "Расходы")
- * @param period Временной период ("День", "Неделя", "Месяц", "Год", "Всё время")
- * @param selectedDate Базовая дата для фильтрации
- * @return Отфильтрованный список операций
+ * @param operations Список операций
+ * @param filterType Тип фильтрации ("Все", "Доходы", "Расходы")
+ * @param period Выбранный период
+ * @param selectedDate Опорная дата для фильтрации
+ * @return Отфильтрованный список операций, отсортированный по дате (от новых к старым)
  */
 private fun filterOperations(
     operations: List<Operation>,
@@ -482,7 +487,15 @@ private fun filterOperations(
 }
 
 /**
- * Компонент кнопки фильтра по типу операции.
+ * Кнопка фильтрации по типу операций.
+ *
+ * @param text Текст кнопки
+ * @param isSelected Активна ли кнопка
+ * @param modifier Модификатор
+ * @param icon Отображать ли иконку
+ * @param isAll Является ли кнопка универсальной (для всех типов)
+ * @param isIncome Тип для иконки (доходы/расходы)
+ * @param onClick Callback при нажатии
  */
 @Composable
 private fun FilterButton(
@@ -546,7 +559,11 @@ private fun FilterButton(
 }
 
 /**
- * Компонент кнопки выбора временного периода.
+ * Кнопка выбора временного периода.
+ *
+ * @param text Текст периода
+ * @param isSelected Активна ли кнопка
+ * @param onClick Callback при нажатии
  */
 @Composable
 private fun PeriodButton(
@@ -573,8 +590,11 @@ private fun PeriodButton(
 }
 
 /**
- * Компонент элемента списка операций.
- * Отображает информацию об операции и кнопки действий.
+ * Отображает одну операцию в списке истории.
+ *
+ * @param operation Операция для отображения
+ * @param onEditClick Callback при нажатии на кнопку редактирования
+ * @param onDeleteClick Callback при нажатии на кнопку удаления
  */
 @Composable
 private fun TransactionItem(

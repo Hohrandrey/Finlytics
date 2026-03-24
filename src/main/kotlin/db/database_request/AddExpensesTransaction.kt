@@ -5,6 +5,9 @@ import java.sql.DriverManager
 /**
  * Объект для добавления транзакций расходов в базу данных.
  * Реализует операцию INSERT для таблицы expenses_transactions.
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 object AddExpensesTransaction {
     private val DB_URL = DatabaseConfig.DB_URL

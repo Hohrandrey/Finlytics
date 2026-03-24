@@ -15,38 +15,56 @@ import repository.FinanceRepository
 /**
  * ViewModel для управления состоянием приложения и бизнес-логикой.
  * Следует архитектуре MVVM, обеспечивает реактивное обновление UI.
+ *
+ * @param repo Репозиторий для доступа к данным финансовых операций и категорий
  */
 class FinanceViewModel(private val repo: FinanceRepository) {
     // Создаем DecimalFormat с явным указанием локали для корректного парсинга
     private val decimalFormat = DecimalFormat("#.##", DecimalFormatSymbols(Locale.US))
 
-    // Хранит текущее состояние приложения
+    /**
+     * Хранит текущее состояние приложения в виде реактивного потока.
+     * Используется для обновления UI при изменении данных.
+     */
     private val _state = MutableStateFlow(FinanceState())
     val state: StateFlow<FinanceState> = _state.asStateFlow()
 
-    // Текущий экран приложения
+    /**
+     * Текущий экран приложения.
+     * Возможные значения: "Overview", "History", "Settings".
+     */
     var currentScreen by mutableStateOf("Overview")
         private set
 
-    // Флаги для отображения диалогов
+    /** Флаг отображения диалога добавления/редактирования операции. */
     var showOperationDialog by mutableStateOf(false)
         private set
+
+    /** Флаг отображения диалога добавления категории. */
     var showAddCategoryDialog by mutableStateOf(false)
         private set
 
+    /** Операция, находящаяся в процессе редактирования. null - режим создания новой операции. */
     var editingOperation by mutableStateOf<Operation?>(null)
         private set
 
+    /** Флаг, указывающий тип добавляемой категории: true - доходы, false - расходы. */
     var isIncomeCategory by mutableStateOf(true)
         private set
 
-    // Инициализация данных при создании
+    /**
+     * Инициализация репозитория и загрузка начальных данных.
+     * Вызывается при создании ViewModel.
+     */
     init {
         refresh()
     }
 
     /**
      * Пересчитывает статистику на основе списка операций.
+     *
+     * Вычисляет общую сумму доходов и расходов, баланс,
+     * а также группирует расходы по категориям для построения диаграмм.
      *
      * @param operations Список операций для анализа
      */
@@ -96,7 +114,7 @@ class FinanceViewModel(private val repo: FinanceRepository) {
 
     /**
      * Обновляет данные из репозитория и пересчитывает статистику.
-     * Вызывается при изменении данных.
+     * Вызывается при изменении данных (добавление, редактирование, удаление операций или категорий).
      */
     fun refresh() {
         println("Обновление данных...")
@@ -139,7 +157,7 @@ class FinanceViewModel(private val repo: FinanceRepository) {
      * Сохраняет операцию: добавляет новую или обновляет существующую.
      * Автоматически обновляет данные приложения после сохранения.
      *
-     * @param op Операция для сохранения (при id=0 - добавление, иначе - обновление)
+     * @param op Операция для сохранения (при id == 0 - добавление, иначе - обновление)
      */
     fun saveOperation(op: Operation) {
         println("Сохранение операции: $op")
@@ -269,11 +287,21 @@ class FinanceViewModel(private val repo: FinanceRepository) {
         }
     }
 
+    /**
+     * Округляет число до указанного количества знаков после запятой.
+     *
+     * @param decimals Количество знаков после запятой
+     * @return Округленное значение
+     */
     private fun Double.roundTo(decimals: Int): Double {
         val multiplier = 10.0.pow(decimals)
         return (this * multiplier).roundToInt() / multiplier
     }
 }
 
-// Добавляем функцию roundToDouble как extension
+/**
+ * Расширение для округления Double до целого числа.
+ *
+ * @return Округленное до ближайшего целого значение
+ */
 fun Double.roundToDouble(): Double = kotlin.math.round(this)

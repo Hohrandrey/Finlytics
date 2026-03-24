@@ -8,9 +8,12 @@ import java.time.LocalDate
  * @property id Уникальный идентификатор операции в базе данных
  * @property type Тип операции: "Доход" или "Расход"
  * @property amount Сумма операции (в рублях)
- * @property category Категория операции
+ * @property category Категория операции (например, "Еда", "Зарплата", "Транспорт")
  * @property date Дата совершения операции
- * @property name Описание операции
+ * @property name Описание операции (необязательное поле)
+ *
+ * @author Finlytics Team
+ * @since 1.0.0
  */
 data class Operation(
     val id: Int,

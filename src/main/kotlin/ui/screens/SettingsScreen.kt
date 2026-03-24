@@ -23,10 +23,12 @@ import viewmodel.FinanceViewModel
 
 /**
  * Экран настроек приложения.
- * Предоставляет управление категориями доходов и расходов:
- * просмотр, добавление и удаление категорий.
+ * Позволяет управлять категориями доходов и расходов:
+ * - Просмотр списка категорий
+ * - Добавление новых категорий
+ * - Удаление категорий (только если нет связанных операций)
  *
- * @param viewModel ViewModel для управления категориями
+ * @param viewModel ViewModel для управления данными и навигацией
  */
 @Composable
 fun SettingsScreen(viewModel: FinanceViewModel) {
@@ -84,7 +86,14 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
 }
 
 /**
- * Панель управления категориями (доходов или расходов).
+ * Панель управления категориями определенного типа (доходы или расходы).
+ *
+ * @param title Заголовок панели
+ * @param count Количество категорий
+ * @param categories Список названий категорий
+ * @param onAddClick Callback при нажатии на кнопку добавления
+ * @param onDeleteClick Callback при удалении категории (передается название категории)
+ * @param modifier Модификатор для настройки внешнего вида
  */
 @Composable
 fun CategoryPanel(
@@ -138,7 +147,11 @@ fun CategoryPanel(
 }
 
 /**
- * Заголовок панели категорий с кнопкой добавления.
+ * Заголовок панели с названием, счетчиком категорий и кнопкой добавления.
+ *
+ * @param title Название панели
+ * @param count Количество категорий
+ * @param onAddClick Callback при нажатии на кнопку добавления
  */
 @Composable
 fun PanelHeader(
@@ -186,7 +199,9 @@ fun PanelHeader(
 }
 
 /**
- * Кнопка добавления новой категории.
+ * Кнопка добавления категории в виде иконки.
+ *
+ * @param onClick Callback при нажатии
  */
 @Composable
 fun AddButton(onClick: () -> Unit) {
@@ -212,7 +227,10 @@ fun AddButton(onClick: () -> Unit) {
 }
 
 /**
- * Прокручиваемый список категорий.
+ * Список категорий с возможностью удаления.
+ *
+ * @param categories Список названий категорий
+ * @param onDeleteClick Callback при удалении категории
  */
 @Composable
 fun CategoryList(
@@ -236,7 +254,10 @@ fun CategoryList(
 }
 
 /**
- * Элемент списка категорий с кнопками действий.
+ * Отдельный элемент списка категорий.
+ *
+ * @param category Название категории
+ * @param onDeleteClick Callback при удалении
  */
 @Composable
 fun CategoryItem(
@@ -275,7 +296,7 @@ fun CategoryItem(
                 .padding(end = 25.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Кнопка редактирования (заглушка)
+            // Кнопка редактирования (заглушка, TODO: реализовать редактирование)
             EditButton(onClick = { /* TODO: Реализовать редактирование */ })
 
             // Кнопка удаления
@@ -285,7 +306,9 @@ fun CategoryItem(
 }
 
 /**
- * Кнопка редактирования категории (заглушка).
+ * Кнопка редактирования категории.
+ *
+ * @param onClick Callback при нажатии
  */
 @Composable
 fun EditButton(onClick: () -> Unit) {
@@ -312,6 +335,8 @@ fun EditButton(onClick: () -> Unit) {
 
 /**
  * Кнопка удаления категории.
+ *
+ * @param onClick Callback при нажатии
  */
 @Composable
 fun DeleteButton(onClick: () -> Unit) {
