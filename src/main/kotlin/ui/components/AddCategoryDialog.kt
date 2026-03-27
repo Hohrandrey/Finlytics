@@ -1,21 +1,21 @@
 package ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ui.theme.AppColors
 import viewmodel.FinanceViewModel
 
 /**
  * Диалоговое окно для добавления новой категории (доходов или расходов).
  * Позволяет пользователю ввести название новой категории.
- *
- * Функциональность:
- * - Ввод названия категории
- * - Валидация: проверка на пустое имя
- * - Автоматическое обновление списка категорий после добавления
  *
  * @param viewModel ViewModel для управления категориями
  */
@@ -26,6 +26,7 @@ fun AddCategoryDialog(viewModel: FinanceViewModel) {
 
     // Определяем тип категории для отображения в заголовке
     val categoryType = if (viewModel.isIncomeCategory) "доходов" else "расходов"
+    val categoryColor = if (viewModel.isIncomeCategory) AppColors.GreenColor else AppColors.RedColor
 
     AlertDialog(
         onDismissRequest = {
@@ -33,34 +34,75 @@ fun AddCategoryDialog(viewModel: FinanceViewModel) {
             categoryName = ""
             error = ""
         },
-        title = { Text("Добавить категорию $categoryType") },
+        title = {
+            Text(
+                "Добавить категорию $categoryType",
+                color = AppColors.LightColor,
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp
+            )
+        },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Пояснительный текст
+                Text(
+                    "Введите название новой категории:",
+                    color = AppColors.LightColor.copy(alpha = 0.8f),
+                    fontSize = 14.sp
+                )
+
+                // Поле ввода
                 OutlinedTextField(
                     value = categoryName,
                     onValueChange = {
                         categoryName = it
                         error = ""
                     },
-                    label = { Text("Название категории") },
+                    label = {
+                        Text(
+                            "Название категории",
+                            color = if (error.isNotEmpty()) AppColors.RedColor else AppColors.LightColor.copy(alpha = 0.7f)
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    isError = error.isNotEmpty()
+                    isError = error.isNotEmpty(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = categoryColor,
+                        unfocusedBorderColor = AppColors.LightGreyColor,
+                        cursorColor = categoryColor,
+                        textColor = AppColors.LightColor
+                    )
                 )
 
+                // Сообщение об ошибке
                 if (error.isNotEmpty()) {
-                    Text(
-                        text = error,
-                        color = AppColors.RedColor,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                    Surface(
+                        color = AppColors.RedColor.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = error,
+                            color = AppColors.RedColor,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
                 }
+
+                // Подсказка
+                Text(
+                    "Название должно быть уникальным и не может быть пустым",
+                    color = AppColors.LightColor.copy(alpha = 0.5f),
+                    fontSize = 11.sp
+                )
             }
         },
         confirmButton = {
             Button(
-                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor),
                 onClick = {
                     // Валидация: проверяем, что название не пустое
                     if (categoryName.trim().isEmpty()) {
@@ -72,22 +114,34 @@ fun AddCategoryDialog(viewModel: FinanceViewModel) {
                     viewModel.saveCategory(categoryName.trim())
                     categoryName = ""
                 },
-                enabled = categoryName.isNotEmpty()
+                colors = ButtonDefaults.buttonColors(backgroundColor = categoryColor),
+                enabled = categoryName.isNotEmpty(),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Добавить", color = AppColors.LightColor)
+                Text(
+                    "Добавить",
+                    color = AppColors.LightColor,
+                    fontWeight = FontWeight.Medium
+                )
             }
         },
         dismissButton = {
             TextButton(
-                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.RedColor),
                 onClick = {
                     viewModel.hideCategoryDialog()
                     categoryName = ""
                     error = ""
-                }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.LightGreyColor),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Отмена", color = AppColors.LightColor)
+                Text(
+                    "Отмена",
+                    color = AppColors.LightColor
+                )
             }
-        }
+        },
+        backgroundColor = AppColors.DarkGreyColor,
+        shape = RoundedCornerShape(16.dp)
     )
 }

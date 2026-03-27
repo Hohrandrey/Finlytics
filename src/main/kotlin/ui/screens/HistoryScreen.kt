@@ -36,7 +36,7 @@ import viewmodel.FinanceViewModel
  * - Фильтрацию по типу операций (Все/Доходы/Расходы)
  * - Фильтрацию по временному периоду (День/Неделя/Месяц/Год/Всё время)
  * - Редактирование операции
- * - Удаление операции с подтверждением
+ * - Удаление операции с подтверждением (единый стиль с остальными диалогами)
  *
  * @param viewModel ViewModel для управления данными
  */
@@ -398,48 +398,188 @@ fun HistoryScreen(viewModel: FinanceViewModel) {
         }
     }
 
-    // Диалог подтверждения удаления
+    // Диалог подтверждения удаления (обновленное оформление)
     if (operationToDelete != null) {
+        val operation = operationToDelete!!
+        val isIncome = operation.type == "Доход"
+        val typeColor = if (isIncome) AppColors.GreenColor else AppColors.RedColor
+        val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
         AlertDialog(
             onDismissRequest = { operationToDelete = null },
-            title = { Text("Подтверждение удаления") },
+            title = {
+                Text(
+                    "Подтверждение удаления",
+                    color = AppColors.LightColor,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp
+                )
+            },
             text = {
-                Text("Вы уверены, что хотите удалить операцию?\n" +
-                        "${operationToDelete!!.category}: " +
-                        "${operationToDelete?.name ?: ""}\n" +
-                        "${String.format("%.2f", operationToDelete!!.amount)} ₽")
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        "Вы уверены, что хотите удалить эту операцию?",
+                        color = AppColors.LightColor,
+                        fontSize = 14.sp
+                    )
+
+                    // Карточка с информацией об операции
+                    Surface(
+                        color = typeColor.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Тип и категория
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // Иконка типа операции
+                                Icon(
+                                    imageVector = if (isIncome) FinlyticsIconPack.Income else FinlyticsIconPack.Expenses,
+                                    contentDescription = operation.type,
+                                    tint = typeColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+
+                                Text(
+                                    operation.type,
+                                    color = typeColor,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                Text(
+                                    "•",
+                                    color = typeColor.copy(alpha = 0.5f),
+                                    fontSize = 12.sp
+                                )
+
+                                Text(
+                                    operation.category,
+                                    color = typeColor,
+                                    fontSize = 14.sp
+                                )
+                            }
+
+                            // Сумма
+                            Row(
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    String.format("%.2f", operation.amount),
+                                    color = AppColors.LightColor,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    "₽",
+                                    color = AppColors.LightColor,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+
+                            Divider(
+                                color = typeColor.copy(alpha = 0.15f),
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+
+                            // Описание (если есть)
+                            if (!operation.name.isNullOrBlank()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        operation.name,
+                                        color = AppColors.LightColor,
+                                        fontSize = 13.sp
+                                    )
+                                }
+                            }
+
+                            // Дата
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = FinlyticsIconPack.Date,
+                                    contentDescription = "date",
+                                    tint = AppColors.LightColor,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    operation.date.format(dateFormatter),
+                                    color = AppColors.LightColor,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+
+                    // Предупреждение
+                    Surface(
+                        color = AppColors.RedColor.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Это действие нельзя отменить. Операция будет удалена безвозвратно.",
+                                color = AppColors.RedColor,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.deleteOperation(operationToDelete!!)
+                        viewModel.deleteOperation(operation)
                         operationToDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.RedColor)
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.RedColor),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Удалить", color = AppColors.LightColor)
+                    Text(
+                        "Удалить",
+                        color = AppColors.LightColor,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = { operationToDelete = null }
+                    onClick = { operationToDelete = null },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.LightGreyColor),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Отмена", color = AppColors.LightColor)
                 }
-            }
+            },
+            backgroundColor = AppColors.DarkGreyColor,
+            shape = RoundedCornerShape(24.dp),
+            modifier = Modifier.widthIn(max = 800.dp)
         )
     }
 }
 
-/**
- * Фильтрует операции по типу и временному периоду.
- *
- * @param operations Список операций
- * @param filterType Тип фильтрации ("Все", "Доходы", "Расходы")
- * @param period Выбранный период
- * @param selectedDate Опорная дата для фильтрации
- * @return Отфильтрованный список операций, отсортированный по дате (от новых к старым)
- */
 private fun filterOperations(
     operations: List<Operation>,
     filterType: String,
@@ -486,17 +626,6 @@ private fun filterOperations(
     }.sortedByDescending { it.date }
 }
 
-/**
- * Кнопка фильтрации по типу операций.
- *
- * @param text Текст кнопки
- * @param isSelected Активна ли кнопка
- * @param modifier Модификатор
- * @param icon Отображать ли иконку
- * @param isAll Является ли кнопка универсальной (для всех типов)
- * @param isIncome Тип для иконки (доходы/расходы)
- * @param onClick Callback при нажатии
- */
 @Composable
 private fun FilterButton(
     text: String,
@@ -558,13 +687,6 @@ private fun FilterButton(
     }
 }
 
-/**
- * Кнопка выбора временного периода.
- *
- * @param text Текст периода
- * @param isSelected Активна ли кнопка
- * @param onClick Callback при нажатии
- */
 @Composable
 private fun PeriodButton(
     text: String,
@@ -589,13 +711,6 @@ private fun PeriodButton(
     }
 }
 
-/**
- * Отображает одну операцию в списке истории.
- *
- * @param operation Операция для отображения
- * @param onEditClick Callback при нажатии на кнопку редактирования
- * @param onDeleteClick Callback при нажатии на кнопку удаления
- */
 @Composable
 private fun TransactionItem(
     operation: Operation,
@@ -604,6 +719,8 @@ private fun TransactionItem(
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val dateText = operation.date.format(formatter)
+    val isIncome = operation.type == "Доход"
+    val typeColor = if (isIncome) AppColors.GreenColor else AppColors.RedColor
 
     Box(
         modifier = Modifier
@@ -638,14 +755,11 @@ private fun TransactionItem(
                     .height(32.dp)
                     .border(
                         width = 1.dp,
-                        color = if (operation.type == "Доход") AppColors.GreenColor else AppColors.RedColor,
+                        color = typeColor,
                         shape = RoundedCornerShape(10.dp)
                     )
                     .background(
-                        color = if (operation.type == "Доход")
-                            AppColors.GreenColor.copy(alpha = 0.25f)
-                        else
-                            AppColors.RedColor.copy(alpha = 0.25f),
+                        color = typeColor.copy(alpha = 0.25f),
                         shape = RoundedCornerShape(10.dp)
                     )
                     .padding(horizontal = 10.dp, vertical = 4.dp),
@@ -655,7 +769,7 @@ private fun TransactionItem(
                     text = operation.category,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Normal,
-                    color = if (operation.type == "Доход") AppColors.GreenColor else AppColors.RedColor
+                    color = typeColor
                 )
             }
 
@@ -677,7 +791,7 @@ private fun TransactionItem(
                     modifier = Modifier.size(14.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (operation.type == "Доход") {
+                    if (isIncome) {
                         Icon(
                             imageVector = FinlyticsIconPack.Plus,
                             contentDescription = "plus",

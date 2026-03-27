@@ -2,27 +2,35 @@ package ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.LaunchedEffect
 import models.Operation
 import viewmodel.FinanceViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.runtime.LaunchedEffect
 import ui.theme.AppColors
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import ui.theme.icons.FinlyticsIconPack
+import ui.theme.icons.finlyticsiconpack.*
 
 /**
  * Диалоговое окно для добавления или редактирования финансовой операции.
  * Поддерживает ввод всех параметров операции: тип, сумму, описание, категорию и дату.
  *
  * Функциональность:
- * - Выбор типа операции (Доход/Расход)
+ * - Выбор типа операции (Доход/Расход) с цветовой индикацией
  * - Ввод суммы с валидацией (положительное число)
  * - Выбор даты с быстрыми кнопками (Сегодня/Вчера/Завтра)
  * - Выбор категории из списка (динамически обновляется при изменении типа)
@@ -53,6 +61,8 @@ fun OperationDialog(viewModel: FinanceViewModel) {
     var categoryError by remember { mutableStateOf("") }
 
     val categories = if (type == "Доход") state.incomeCategories else state.expenseCategories
+    val isIncome = type == "Доход"
+    val typeColor = if (isIncome) AppColors.GreenColor else AppColors.RedColor
 
     // Преобразуем текст в LocalDate
     val selectedDate = remember(dateText) {
@@ -70,121 +80,205 @@ fun OperationDialog(viewModel: FinanceViewModel) {
             categoryError = ""
             dateError = ""
         },
-        title = { Text(if (viewModel.editingOperation == null) "Новая операция" else "Редактирование операции") },
+        title = {
+            Text(
+                if (viewModel.editingOperation == null) "Новая операция" else "Редактирование операции",
+                color = AppColors.LightColor,
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp
+            )
+        },
         text = {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 // Выбор типа операции (Доход/Расход)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    Text(
+                        "Тип операции",
+                        color = AppColors.LightColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable {
-                            type = "Доход"
-                            amountError = ""
-                            categoryError = ""
-                        }
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        RadioButton(
-                            selected = type == "Доход",
-                            colors = RadioButtonDefaults.colors(AppColors.GreenColor),
+                        // Кнопка "Доход"
+                        TypeButton(
+                            text = "Доход",
+                            isSelected = type == "Доход",
+                            color = AppColors.GreenColor,
+                            modifier = Modifier.weight(1f),
                             onClick = {
                                 type = "Доход"
                                 amountError = ""
                                 categoryError = ""
                             }
                         )
-                        Text("Доход")
-                    }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable {
-                            type = "Расход"
-                            amountError = ""
-                            categoryError = ""
-                        }
-                    ) {
-                        RadioButton(
-                            selected = type == "Расход",
-                            colors = RadioButtonDefaults.colors(AppColors.RedColor),
+                        // Кнопка "Расход"
+                        TypeButton(
+                            text = "Расход",
+                            isSelected = type == "Расход",
+                            color = AppColors.RedColor,
+                            modifier = Modifier.weight(1f),
                             onClick = {
                                 type = "Расход"
                                 amountError = ""
                                 categoryError = ""
                             }
                         )
-                        Text("Расход")
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
-
-                // Поле для ввода суммы
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = {
-                        amount = it
-                        amountError = ""
-                    },
-                    label = { Text("Сумма (руб.)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = amountError.isNotEmpty()
-                )
-
-                if (amountError.isNotEmpty()) {
-                    Text(
-                        text = amountError,
-                        color = AppColors.RedColor,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                // Поле для ввода даты с валидацией
-                OutlinedTextField(
-                    value = dateText,
-                    onValueChange = {
-                        dateText = it
-                        dateError = ""
-
-                        // Проверка формата даты в реальном времени
-                        try {
-                            LocalDate.parse(it)
-                            dateError = ""
-                        } catch (e: DateTimeParseException) {
-                            if (it.isNotEmpty()) {
-                                if (it.length > 5) {
-                                    dateError = "Формат даты: ГГГГ-ММ-ДД (например: ${LocalDate.now()})"
-                                }
-                            }
-                        }
-                    },
-                    label = { Text("Дата (ГГГГ-ММ-ДД)") },
-                    placeholder = { Text("Пример: ${LocalDate.now()}") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = dateError.isNotEmpty()
-                )
-
-                if (dateError.isNotEmpty()) {
-                    Text(
-                        text = dateError,
-                        color = AppColors.RedColor,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-
-                // Быстрые кнопки для выбора стандартных дат
+                // Сумма и дата в одной строке
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Поле для ввода суммы
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            "Сумма (₽)",
+                            color = AppColors.LightColor,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        OutlinedTextField(
+                            value = amount,
+                            onValueChange = {
+                                amount = it
+                                amountError = ""
+                            },
+                            placeholder = {
+                                Text(
+                                    "0.00",
+                                    color = AppColors.LightColor.copy(alpha = 0.5f)
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            isError = amountError.isNotEmpty(),
+                            singleLine = true,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = typeColor,
+                                unfocusedBorderColor = AppColors.LightGreyColor,
+                                cursorColor = typeColor,
+                                textColor = AppColors.LightColor
+                            )
+                        )
+                    }
+
+                    // Поле для ввода даты
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            "Дата",
+                            color = AppColors.LightColor,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        OutlinedTextField(
+                            value = dateText,
+                            onValueChange = {
+                                dateText = it
+                                dateError = ""
+                                try {
+                                    LocalDate.parse(it)
+                                    dateError = ""
+                                } catch (e: DateTimeParseException) {
+                                    if (it.isNotEmpty() && it.length > 5) {
+                                        dateError = "Формат: ГГГГ-ММ-ДД"
+                                    }
+                                }
+                            },
+                            placeholder = {
+                                Text(
+                                    "ГГГГ-ММ-ДД",
+                                    color = AppColors.LightColor.copy(alpha = 0.5f)
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            isError = dateError.isNotEmpty(),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = typeColor,
+                                unfocusedBorderColor = AppColors.LightGreyColor,
+                                cursorColor = typeColor,
+                                textColor = AppColors.LightColor
+                            )
+                        )
+                    }
+                }
+
+                // Отображение ошибок суммы и даты в одной строке
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Ошибка суммы
+                    if (amountError.isNotEmpty()) {
+                        Surface(
+                            color = AppColors.RedColor.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = amountError,
+                                color = AppColors.RedColor,
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(6.dp)
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    // Ошибка даты
+                    if (dateError.isNotEmpty()) {
+                        Surface(
+                            color = AppColors.RedColor.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = dateError,
+                                color = AppColors.RedColor,
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(6.dp)
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+
+                // Быстрые кнопки для выбора дат
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     listOf("Сегодня", "Вчера", "Завтра").forEach { label ->
-                        Button(
+                        QuickDateButton(
+                            label = label,
+                            isSelected = when (label) {
+                                "Сегодня" -> selectedDate == LocalDate.now()
+                                "Вчера" -> selectedDate == LocalDate.now().minusDays(1)
+                                "Завтра" -> selectedDate == LocalDate.now().plusDays(1)
+                                else -> false
+                            },
                             onClick = {
                                 val newDate = when (label) {
                                     "Сегодня" -> LocalDate.now()
@@ -195,114 +289,121 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                                 dateText = newDate.toString()
                                 dateError = ""
                             },
-                            modifier = Modifier.weight(1f).padding(horizontal = 2.dp),
-                            colors = if (selectedDate?.let {
-                                    when (label) {
-                                        "Сегодня" -> it == LocalDate.now()
-                                        "Вчера" -> it == LocalDate.now().minusDays(1)
-                                        "Завтра" -> it == LocalDate.now().plusDays(1)
-                                        else -> false
-                                    }
-                                } == true) {
-                                ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor)
-                            } else {
-                                ButtonDefaults.buttonColors(backgroundColor = AppColors.LightGreyColor)
-                            }
-                        ) {
-                            Text(
-                                label,
-                                color = if (selectedDate?.let {
-                                        when (label) {
-                                            "Сегодня" -> it == LocalDate.now()
-                                            "Вчера" -> it == LocalDate.now().minusDays(1)
-                                            "Завтра" -> it == LocalDate.now().plusDays(1)
-                                            else -> false
-                                        }
-                                    } == true) {
-                                    AppColors.LightColor
-                                } else {
-                                    AppColors.LightColor
-                                }
-                            )
-                        }
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
 
-                Spacer(Modifier.height(8.dp))
-
                 // Поле для ввода описания
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = {
-                        name = it
-                    },
-                    label = { Text("Описание (необязательно)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        "Описание",
+                        color = AppColors.LightColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
 
-                Spacer(Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        placeholder = {
+                            Text(
+                                "Необязательно",
+                                color = AppColors.LightColor.copy(alpha = 0.5f)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = typeColor,
+                            unfocusedBorderColor = AppColors.LightGreyColor,
+                            cursorColor = typeColor,
+                            textColor = AppColors.LightColor
+                        )
+                    )
+                }
 
-                // Выбор категории из списка
-                if (categories.isNotEmpty()) {
-                    Column {
-                        Text("Категория:", style = MaterialTheme.typography.caption)
-                        Spacer(Modifier.height(4.dp))
+                // Выбор категории
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        "Категория",
+                        color = AppColors.LightColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
 
-                        // Прокручиваемый список категорий
+                    if (categories.isNotEmpty()) {
+                        // Список категорий
                         LazyColumn(
-                            modifier = Modifier.heightIn(max = 200.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 180.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(AppColors.LightGreyColor),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             items(categories) { item ->
-                                Button(
+                                CategoryItem(
+                                    name = item,
+                                    isSelected = category == item,
                                     onClick = {
                                         category = item
                                         categoryError = ""
                                     },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = if (category == item)
-                                        ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor)
-                                    else
-                                        ButtonDefaults.buttonColors(backgroundColor = AppColors.LightGreyColor)
-                                ) {
-                                    Text(
-                                        item,
-                                        color = if (category == item)
-                                            AppColors.LightColor
-                                        else
-                                            AppColors.LightColor,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
+                                    color = typeColor
+                                )
                             }
                         }
 
                         if (categoryError.isNotEmpty()) {
-                            Text(
-                                text = categoryError,
-                                color = AppColors.RedColor,
-                                style = MaterialTheme.typography.caption,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                            Surface(
+                                color = AppColors.RedColor.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = categoryError,
+                                    color = AppColors.RedColor,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
                         }
-                    }
-                } else {
-                    // Если категорий нет, предлагаем добавить новую
-                    Column {
-                        Text(
-                            text = "Нет доступных категорий",
-                            color = AppColors.RedColor,
-                            style = MaterialTheme.typography.caption
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Button(
-                            onClick = {
-                                viewModel.showAddCategory(type == "Доход")
-                            },
+                    } else {
+                        // Если категорий нет
+                        Surface(
+                            color = AppColors.RedColor.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Добавить категорию ${if (type == "Доход") "доходов" else "расходов"}")
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "⚠️ Нет доступных категорий",
+                                    color = AppColors.RedColor,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(
+                                    onClick = {
+                                        viewModel.showAddCategory(type == "Доход")
+                                    },
+                                    colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        "Добавить категорию",
+                                        color = AppColors.LightColor,
+                                        fontSize = 13.sp
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -310,12 +411,11 @@ fun OperationDialog(viewModel: FinanceViewModel) {
         },
         confirmButton = {
             Button(
-                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.BlueColor),
                 onClick = {
                     // Валидация суммы
                     val sum = amount.toDoubleOrNull()
                     if (sum == null || sum <= 0) {
-                        amountError = "Введите корректную сумму"
+                        amountError = "Введите сумму > 0"
                         return@Button
                     }
 
@@ -329,7 +429,7 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                     val parsedDate = try {
                         LocalDate.parse(dateText)
                     } catch (e: DateTimeParseException) {
-                        dateError = "Неверный формат даты. Используйте ГГГГ-ММ-ДД"
+                        dateError = "Неверный формат даты"
                         return@Button
                     }
 
@@ -345,28 +445,142 @@ fun OperationDialog(viewModel: FinanceViewModel) {
                         amount = sum,
                         category = category,
                         date = parsedDate,
-                        name = name
+                        name = name.ifBlank { null }
                     )
 
                     viewModel.saveOperation(op)
                 },
-                enabled = amount.isNotEmpty() && category.isNotEmpty() && dateText.isNotEmpty() && selectedDate != null
+                colors = ButtonDefaults.buttonColors(backgroundColor = typeColor),
+                enabled = amount.isNotEmpty() && category.isNotEmpty() && dateText.isNotEmpty() && selectedDate != null,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Сохранить", color = AppColors.LightColor)
+                Text(
+                    if (viewModel.editingOperation == null) "Создать операцию" else "Сохранить изменения",
+                    color = AppColors.LightColor,
+                    fontWeight = FontWeight.Medium
+                )
             }
         },
         dismissButton = {
             TextButton(
-                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.RedColor),
                 onClick = {
                     viewModel.hideOperationDialog()
                     amountError = ""
                     categoryError = ""
                     dateError = ""
-                }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.LightGreyColor),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Отмена", color = AppColors.LightColor)
             }
-        }
+        },
+        backgroundColor = AppColors.DarkGreyColor,
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.widthIn(max = 800.dp)
     )
+}
+
+/**
+ * Кнопка выбора типа операции (Доход/Расход)
+ */
+@Composable
+private fun TypeButton(
+    text: String,
+    isSelected: Boolean,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(48.dp),
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (isSelected) color else AppColors.LightGreyColor
+        ),
+        elevation = null
+    ) {
+        Text(
+            text,
+            color = if (isSelected) AppColors.LightColor else AppColors.LightColor,
+            fontSize = 16.sp,
+            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+        )
+    }
+}
+
+/**
+ * Кнопка быстрого выбора даты
+ */
+@Composable
+private fun QuickDateButton(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(36.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (isSelected) AppColors.BlueColor else AppColors.LightGreyColor
+        ),
+        elevation = null
+    ) {
+        Text(
+            label,
+            color = AppColors.LightColor,
+            fontSize = 13.sp,
+            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+        )
+    }
+}
+
+/**
+ * Элемент списка категорий
+ */
+@Composable
+private fun CategoryItem(
+    name: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    color: Color
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(8.dp),
+        color = if (isSelected) color.copy(alpha = 0.2f) else Color.Transparent
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = name,
+                color = if (isSelected) color else AppColors.LightColor,
+                fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (isSelected) {
+                Icon(
+                    imageVector = FinlyticsIconPack.Check,
+                    contentDescription = "selected",
+                    tint = color,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
 }

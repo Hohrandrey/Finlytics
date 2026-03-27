@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ui.components.AddCategoryDialog
 import ui.components.NavigationBar
 import ui.theme.AppColors
 import ui.theme.icons.FinlyticsIconPack
@@ -26,13 +27,23 @@ import viewmodel.FinanceViewModel
  * Позволяет управлять категориями доходов и расходов:
  * - Просмотр списка категорий
  * - Добавление новых категорий
- * - Удаление категорий (только если нет связанных операций)
+ * - Удаление категорий с подтверждением (только если нет связанных операций)
  *
  * @param viewModel ViewModel для управления данными и навигацией
  */
 @Composable
 fun SettingsScreen(viewModel: FinanceViewModel) {
     val state by viewModel.state.collectAsState()
+
+    // Состояния для диалогов
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var categoryToDelete by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
+
+    // Функция для открытия диалога удаления
+    val onDeleteCategory = { category: String, isIncome: Boolean ->
+        categoryToDelete = Pair(category, isIncome)
+        showDeleteConfirmation = true
+    }
 
     Box(
         modifier = Modifier
@@ -58,7 +69,8 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
                     count = state.incomeCategories.size,
                     categories = state.incomeCategories,
                     onAddClick = { viewModel.showAddCategory(true) },
-                    onDeleteClick = { category -> viewModel.deleteCategory(category, true) },
+                    onDeleteClick = { category -> onDeleteCategory(category, true) },
+                    isIncome = true,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -68,7 +80,8 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
                     count = state.expenseCategories.size,
                     categories = state.expenseCategories,
                     onAddClick = { viewModel.showAddCategory(false) },
-                    onDeleteClick = { category -> viewModel.deleteCategory(category, false) },
+                    onDeleteClick = { category -> onDeleteCategory(category, false) },
+                    isIncome = false,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -83,6 +96,134 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
             NavigationBar(viewModel)
         }
     }
+
+    // Диалог добавления категории
+    if (viewModel.showAddCategoryDialog) {
+        AddCategoryDialog(viewModel)
+    }
+
+    // Диалог подтверждения удаления категории
+    if (showDeleteConfirmation && categoryToDelete != null) {
+        val (categoryName, isIncome) = categoryToDelete!!
+        val categoryType = if (isIncome) "доходов" else "расходов"
+        val categoryColor = if (isIncome) AppColors.GreenColor else AppColors.RedColor
+
+        // Проверяем, есть ли операции с этой категорией
+        val hasOperations = if (isIncome) {
+            state.operations.any { it.type == "Доход" && it.category == categoryName }
+        } else {
+            state.operations.any { it.type == "Расход" && it.category == categoryName }
+        }
+
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteConfirmation = false
+                categoryToDelete = null
+            },
+            title = {
+                Text(
+                    "Подтверждение удаления",
+                    color = AppColors.LightColor,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        "Вы уверены, что хотите удалить категорию?",
+                        color = AppColors.LightColor,
+                        fontSize = 14.sp
+                    )
+
+                    // Выделенная категория
+                    Surface(
+                        color = categoryColor.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "\"$categoryName\"",
+                            color = categoryColor,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+
+                    if (hasOperations) {
+                        // Предупреждение о наличии операций
+                        Surface(
+                            color = AppColors.RedColor.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp)
+                            ) {
+                                Text(
+                                    "⚠️ Внимание!",
+                                    color = AppColors.RedColor,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    "Существуют операции с этой категорией. " +
+                                            "Удаление категории невозможно, пока есть связанные операции.",
+                                    color = AppColors.RedColor,
+                                    fontSize = 13.sp
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            "Эта категория не используется ни в одной операции и может быть безопасно удалена.",
+                            color = AppColors.LightColor.copy(alpha = 0.7f),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (!hasOperations) {
+                            viewModel.deleteCategory(categoryName, isIncome)
+                        }
+                        showDeleteConfirmation = false
+                        categoryToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = if (hasOperations) AppColors.LightGreyColor else AppColors.RedColor
+                    ),
+                    enabled = !hasOperations,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        "Удалить",
+                        color = if (hasOperations) AppColors.LightColor.copy(alpha = 0.5f) else AppColors.LightColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmation = false
+                        categoryToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.LightGreyColor),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Отмена", color = AppColors.LightColor)
+                }
+            },
+            backgroundColor = AppColors.DarkGreyColor,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
 }
 
 /**
@@ -92,7 +233,8 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
  * @param count Количество категорий
  * @param categories Список названий категорий
  * @param onAddClick Callback при нажатии на кнопку добавления
- * @param onDeleteClick Callback при удалении категории (передается название категории)
+ * @param onDeleteClick Callback при удалении категории
+ * @param isIncome Тип категории (для цветового оформления)
  * @param modifier Модификатор для настройки внешнего вида
  */
 @Composable
@@ -102,6 +244,7 @@ fun CategoryPanel(
     categories: List<String>,
     onAddClick: () -> Unit,
     onDeleteClick: (String) -> Unit,
+    isIncome: Boolean,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -139,20 +282,14 @@ fun CategoryPanel(
             } else {
                 CategoryList(
                     categories = categories,
-                    onDeleteClick = onDeleteClick
+                    onDeleteClick = onDeleteClick,
+                    isIncome = isIncome
                 )
             }
         }
     }
 }
 
-/**
- * Заголовок панели с названием, счетчиком категорий и кнопкой добавления.
- *
- * @param title Название панели
- * @param count Количество категорий
- * @param onAddClick Callback при нажатии на кнопку добавления
- */
 @Composable
 fun PanelHeader(
     title: String,
@@ -198,11 +335,6 @@ fun PanelHeader(
     }
 }
 
-/**
- * Кнопка добавления категории в виде иконки.
- *
- * @param onClick Callback при нажатии
- */
 @Composable
 fun AddButton(onClick: () -> Unit) {
     Box(
@@ -226,18 +358,14 @@ fun AddButton(onClick: () -> Unit) {
     }
 }
 
-/**
- * Список категорий с возможностью удаления.
- *
- * @param categories Список названий категорий
- * @param onDeleteClick Callback при удалении категории
- */
 @Composable
 fun CategoryList(
     categories: List<String>,
-    onDeleteClick: (String) -> Unit
+    onDeleteClick: (String) -> Unit,
+    isIncome: Boolean
 ) {
     val lazyListState = rememberLazyListState()
+    val categoryColor = if (isIncome) AppColors.GreenColor else AppColors.RedColor
 
     LazyColumn(
         state = lazyListState,
@@ -247,22 +375,18 @@ fun CategoryList(
         items(categories) { category ->
             CategoryItem(
                 category = category,
-                onDeleteClick = { onDeleteClick(category) }
+                onDeleteClick = { onDeleteClick(category) },
+                categoryColor = categoryColor
             )
         }
     }
 }
 
-/**
- * Отдельный элемент списка категорий.
- *
- * @param category Название категории
- * @param onDeleteClick Callback при удалении
- */
 @Composable
 fun CategoryItem(
     category: String,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    categoryColor: androidx.compose.ui.graphics.Color
 ) {
     Box(
         modifier = Modifier
@@ -289,55 +413,17 @@ fun CategoryItem(
                 .padding(start = 25.dp)
         )
 
-        // Кнопки действий
-        Row(
+        // Кнопка удаления (справа)
+        Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 25.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(end = 15.dp)
         ) {
-            // Кнопка редактирования (заглушка, TODO: реализовать редактирование)
-            EditButton(onClick = { /* TODO: Реализовать редактирование */ })
-
-            // Кнопка удаления
             DeleteButton(onClick = onDeleteClick)
         }
     }
 }
 
-/**
- * Кнопка редактирования категории.
- *
- * @param onClick Callback при нажатии
- */
-@Composable
-fun EditButton(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(28.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(AppColors.YellowColor)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = FinlyticsIconPack.Edit,
-            contentDescription = "edit",
-            modifier = Modifier.size(28.dp),
-            tint = AppColors.LightColor
-        )
-    }
-}
-
-/**
- * Кнопка удаления категории.
- *
- * @param onClick Callback при нажатии
- */
 @Composable
 fun DeleteButton(onClick: () -> Unit) {
     Box(
