@@ -24,10 +24,13 @@ import viewmodel.FinanceViewModel
 
 /**
  * Экран настроек приложения.
- * Позволяет управлять категориями доходов и расходов:
- * - Просмотр списка категорий
- * - Добавление новых категорий
- * - Удаление категорий с подтверждением (только если нет связанных операций)
+ * Позволяет управлять категориями доходов и расходов.
+ *
+ * Основные функции:
+ * - Просмотр списка категорий доходов и расходов
+ * - Добавление новых категорий через диалоговое окно
+ * - Удаление категорий с подтверждением
+ * - Проверка наличия связанных операций перед удалением
  *
  * @param viewModel ViewModel для управления данными и навигацией
  */
@@ -39,7 +42,13 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
 
-    // Функция для открытия диалога удаления
+    /**
+     * Обработчик удаления категории.
+     * Открывает диалог подтверждения с проверкой наличия связанных операций.
+     *
+     * @param category Название категории для удаления
+     * @param isIncome true для категории доходов, false для категории расходов
+     */
     val onDeleteCategory = { category: String, isIncome: Boolean ->
         categoryToDelete = Pair(category, isIncome)
         showDeleteConfirmation = true
@@ -229,11 +238,14 @@ fun SettingsScreen(viewModel: FinanceViewModel) {
 /**
  * Панель управления категориями определенного типа (доходы или расходы).
  *
+ * Отображает заголовок с количеством категорий, кнопку добавления
+ * и список категорий с возможностью удаления каждой.
+ *
  * @param title Заголовок панели
  * @param count Количество категорий
  * @param categories Список названий категорий
  * @param onAddClick Callback при нажатии на кнопку добавления
- * @param onDeleteClick Callback при удалении категории
+ * @param onDeleteClick Callback при удалении категории (передаётся название категории)
  * @param isIncome Тип категории (для цветового оформления)
  * @param modifier Модификатор для настройки внешнего вида
  */
@@ -290,6 +302,15 @@ fun CategoryPanel(
     }
 }
 
+/**
+ * Заголовок панели категорий.
+ *
+ * Отображает название панели, счётчик категорий и кнопку добавления.
+ *
+ * @param title Название панели
+ * @param count Количество категорий
+ * @param onAddClick Callback при нажатии на кнопку добавления
+ */
 @Composable
 fun PanelHeader(
     title: String,
@@ -335,6 +356,13 @@ fun PanelHeader(
     }
 }
 
+/**
+ * Кнопка добавления категории.
+ *
+ * Отображает синюю кнопку с иконкой плюса.
+ *
+ * @param onClick Callback при нажатии на кнопку
+ */
 @Composable
 fun AddButton(onClick: () -> Unit) {
     Box(
@@ -358,6 +386,15 @@ fun AddButton(onClick: () -> Unit) {
     }
 }
 
+/**
+ * Список категорий с поддержкой прокрутки.
+ *
+ * Отображает список категорий с возможностью удаления каждой.
+ *
+ * @param categories Список названий категорий
+ * @param onDeleteClick Callback при удалении категории
+ * @param isIncome Тип категории (для определения цвета)
+ */
 @Composable
 fun CategoryList(
     categories: List<String>,
@@ -382,6 +419,15 @@ fun CategoryList(
     }
 }
 
+/**
+ * Элемент списка категорий.
+ *
+ * Отображает название категории и кнопку удаления.
+ *
+ * @param category Название категории
+ * @param onDeleteClick Callback при нажатии на кнопку удаления
+ * @param categoryColor Цвет для выделения категории (зелёный для доходов, красный для расходов)
+ */
 @Composable
 fun CategoryItem(
     category: String,
@@ -424,6 +470,13 @@ fun CategoryItem(
     }
 }
 
+/**
+ * Кнопка удаления категории.
+ *
+ * Отображает красную кнопку с иконкой корзины.
+ *
+ * @param onClick Callback при нажатии на кнопку
+ */
 @Composable
 fun DeleteButton(onClick: () -> Unit) {
     Box(

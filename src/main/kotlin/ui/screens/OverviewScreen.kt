@@ -35,6 +35,14 @@ import viewmodel.FinanceViewModel
  * Отображает круговую диаграмму распределения расходов/доходов,
  * финансовую сводку (баланс, доходы, расходы) и список категорий.
  *
+ * Основные функции:
+ * - Фильтрация данных по типу (Доходы/Расходы)
+ * - Фильтрация по временному периоду (День/Неделя/Месяц/Год/Всё время)
+ * - Отображение круговой диаграммы распределения по категориям
+ * - Отображение финансовой сводки (доходы, расходы, баланс)
+ * - Сравнение расходов с предыдущим периодом ("Гонка с призраком")
+ * - Список категорий с процентами от общей суммы
+ *
  * @param viewModel ViewModel для управления финансовыми данными
  */
 @Composable
@@ -51,7 +59,10 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
     val monthYearFormatter = DateTimeFormatter.ofPattern("MM.yyyy")
     val yearFormatter = DateTimeFormatter.ofPattern("yyyy")
 
-    // Функция для фильтрации операций по периоду (все операции за период)
+    /**
+     * Фильтрация всех операций за выбранный период (без учёта типа).
+     * Используется для расчёта общей статистики (баланс, доходы, расходы).
+     */
     val allOperationsForPeriod = remember(state.operations, selectedPeriod, selectedDate) {
         filterOperationsByPeriod(
             operations = state.operations,
@@ -60,7 +71,10 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
         )
     }
 
-    // Функция для фильтрации операций по типу и периоду (для диаграммы)
+    /**
+     * Фильтрация операций по типу и периоду.
+     * Используется для построения круговой диаграммы и списка категорий.
+     */
     val filteredOperationsByType = remember(state.operations, selectedFilter, selectedPeriod, selectedDate) {
         filterOperationsByType(
             operations = state.operations,
@@ -115,7 +129,13 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
     // Подготавливаем список категорий для отображения с процентами
     val categoryList = operationsByCategory.entries.sortedByDescending { it.value }
 
-    // Функция для получения отображаемой даты в зависимости от периода
+    /**
+     * Получение отображаемого текста даты в зависимости от выбранного периода.
+     * Для дня: DD.MM.YYYY
+     * Для недели: DD.MM.YYYY - DD.MM.YYYY
+     * Для месяца: MM.YYYY
+     * Для года: YYYY
+     */
     val displayDateText = remember(selectedPeriod, selectedDate) {
         when (selectedPeriod) {
             "День" -> selectedDate.format(dateFormatter)
@@ -781,6 +801,18 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
 /**
  * Фильтрует операции по временному периоду.
+ *
+ * Поддерживаемые периоды:
+ * - "День": все операции за выбранную дату
+ * - "Неделя": все операции с понедельника по воскресенье выбранной недели
+ * - "Месяц": все операции с первого по последний день выбранного месяца
+ * - "Год": все операции с первого по последний день выбранного года
+ * - "Всё время": все операции без фильтрации по дате
+ *
+ * @param operations Список всех операций для фильтрации
+ * @param period Выбранный период ("День", "Неделя", "Месяц", "Год", "Всё время")
+ * @param selectedDate Опорная дата для расчёта границ периода
+ * @return Отфильтрованный список операций, отсортированный по убыванию даты
  */
 private fun filterOperationsByPeriod(
     operations: List<models.Operation>,
@@ -821,6 +853,15 @@ private fun filterOperationsByPeriod(
 
 /**
  * Фильтрует операции по типу и временному периоду.
+ *
+ * Сначала применяется фильтрация по типу операции (Доходы/Расходы),
+ * затем фильтрация по выбранному временному периоду.
+ *
+ * @param operations Список всех операций для фильтрации
+ * @param filterType Тип фильтра ("Доходы", "Расходы" или другое значение для всех операций)
+ * @param period Выбранный период ("День", "Неделя", "Месяц", "Год", "Всё время")
+ * @param selectedDate Опорная дата для расчёта границ периода
+ * @return Отфильтрованный список операций, отсортированный по убыванию даты
  */
 private fun filterOperationsByType(
     operations: List<models.Operation>,
@@ -868,6 +909,24 @@ private fun filterOperationsByType(
     }.sortedByDescending { it.date }
 }
 
+/**
+ * Кнопка фильтрации для выбора типа операций.
+ *
+ * Отображает кнопку с иконкой (для доходов/расходов) или без неё.
+ * Цвет кнопки меняется в зависимости от выбранного состояния:
+ * - Для "Доходов": зелёный цвет
+ * - Для "Расходов": красный цвет
+ * - Для "Всех": синий цвет
+ * - Невыбранное состояние: серый цвет
+ *
+ * @param text Текст кнопки
+ * @param isSelected Выбрана ли кнопка в данный момент
+ * @param modifier Модификатор для настройки внешнего вида
+ * @param icon Флаг отображения иконки
+ * @param isAll Флаг, является ли кнопка кнопкой "Все"
+ * @param isIncome Флаг, является ли кнопка кнопкой доходов (для определения цвета)
+ * @param onClick Callback при нажатии на кнопку
+ */
 @Composable
 private fun FilterButton(
     text: String,
@@ -929,6 +988,15 @@ private fun FilterButton(
     }
 }
 
+/**
+ * Кнопка выбора временного периода.
+ *
+ * Отображает кнопку с текстом периода. Цвет кнопки меняется на синий при выборе.
+ *
+ * @param text Текст кнопки (День, Неделя, Месяц, Год, Всё время)
+ * @param isSelected Выбрана ли кнопка в данный момент
+ * @param onClick Callback при нажатии на кнопку
+ */
 @Composable
 private fun PeriodButton(
     text: String,
