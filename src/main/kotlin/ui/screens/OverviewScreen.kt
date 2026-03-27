@@ -2,6 +2,7 @@ package ui.screens
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import kotlin.math.min
+import ui.components.GhostRaceProgressBar
 import ui.components.NavigationBar
 import ui.components.PieChart
 import ui.theme.AppColors
@@ -29,16 +31,11 @@ import ui.theme.icons.finlyticsiconpack.*
 import viewmodel.FinanceViewModel
 
 /**
- * Главный экран "Обзор" приложения.
- * Отображает статистику доходов и расходов, круговую диаграмму распределения,
- * а также список категорий с процентным соотношением.
+ * Экран обзора финансовой статистики.
+ * Отображает круговую диаграмму распределения расходов/доходов,
+ * финансовую сводку (баланс, доходы, расходы) и список категорий.
  *
- * Поддерживает фильтрацию по:
- * - Типу операций (Доходы/Расходы)
- * - Временному периоду (День/Неделя/Месяц/Год/Всё время)
- * - Конкретной дате (для выбранного периода)
- *
- * @param viewModel ViewModel для управления данными
+ * @param viewModel ViewModel для управления финансовыми данными
  */
 @Composable
 fun OverviewScreen(viewModel: FinanceViewModel) {
@@ -54,9 +51,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
     val monthYearFormatter = DateTimeFormatter.ofPattern("MM.yyyy")
     val yearFormatter = DateTimeFormatter.ofPattern("yyyy")
 
-    /**
-     * Функция для фильтрации операций по периоду (все операции за период)
-     */
+    // Функция для фильтрации операций по периоду (все операции за период)
     val allOperationsForPeriod = remember(state.operations, selectedPeriod, selectedDate) {
         filterOperationsByPeriod(
             operations = state.operations,
@@ -65,9 +60,7 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
         )
     }
 
-    /**
-     * Функция для фильтрации операций по типу и периоду (для диаграммы)
-     */
+    // Функция для фильтрации операций по типу и периоду (для диаграммы)
     val filteredOperationsByType = remember(state.operations, selectedFilter, selectedPeriod, selectedDate) {
         filterOperationsByType(
             operations = state.operations,
@@ -81,6 +74,24 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
     val totalIncome = allOperationsForPeriod.filter { it.type == "Доход" }.sumOf { it.amount }
     val totalExpenses = allOperationsForPeriod.filter { it.type == "Расход" }.sumOf { it.amount }
     val balance = totalIncome - totalExpenses
+
+    // Гонка с Призраком за предыдущий такой же выбранный период
+    val currentPeriodExpenses = totalExpenses
+    val previousPeriodExpenses = remember(selectedPeriod, selectedDate, state.operations) {
+        if (selectedPeriod == "Всё время") 0.0
+        else {
+            val previousDate = when (selectedPeriod) {
+                "День" -> selectedDate.minusDays(1)
+                "Неделя" -> selectedDate.minusWeeks(1)
+                "Месяц" -> selectedDate.minusMonths(1)
+                "Год" -> selectedDate.minusYears(1)
+                else -> selectedDate
+            }
+            val previousPeriodOps = filterOperationsByPeriod(state.operations, selectedPeriod, previousDate)
+            previousPeriodOps.filter { it.type == "Расход" }.sumOf { it.amount }
+        }
+    }
+    val ghostRacePercent = if (previousPeriodExpenses > 0) currentPeriodExpenses / previousPeriodExpenses else 0.0
 
     // Группируем операции по категориям в зависимости от выбранного фильтра (только для диаграммы)
     val operationsByCategory = remember(selectedFilter, filteredOperationsByType) {
@@ -588,145 +599,167 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
                     }
                 }
 
-                // Список категорий (правая часть)
+                // Гонка с призраком + Список категорий
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = if (categoryList.isEmpty()) {
-                        Arrangement.Center
-                    } else {
-                        Arrangement.spacedBy(25.dp)
-                    }
                 ) {
-                    if (categoryList.isEmpty()) {
-                        // Сообщение об отсутствии данных для выбранного фильтра
-                        Text(
-                            if (filteredOperationsByType.isEmpty()) "Нет операций за выбранный период" else "Нет ${selectedFilter.lowercase()} за выбранный период",
-                            fontSize = 20.sp,
-                            color = AppColors.LightColor.copy(alpha = 0.5f),
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                    // Прогресс-бар гонки (только если выбран не "Всё время")
+                    if (selectedPeriod != "Всё время") {
+                        GhostRaceProgressBar(
+                            currentExpenses = currentPeriodExpenses,
+                            previousExpenses = previousPeriodExpenses,
+                            percent = ghostRacePercent,
+                            modifier = Modifier.fillMaxWidth()
                         )
-                    } else {
-                        val totalForCategoryType = if (selectedFilter == "Доходы") {
-                            filteredOperationsByType
-                                .filter { it.type == "Доход" }
-                                .sumOf { it.amount }
-                        } else {
-                            filteredOperationsByType
-                                .filter { it.type == "Расход" }
-                                .sumOf { it.amount }
-                        }
+                        Spacer(modifier = Modifier.height(25.dp))
+                    }
 
-                        val gradients = if (selectedFilter == "Доходы") {
-                            listOf(
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor1)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor2)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor3)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor4)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor5)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor6)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor7)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor8))
-                            )
+                    LazyColumn(
+                        verticalArrangement = if (categoryList.isEmpty()) {
+                            Arrangement.Center
                         } else {
-                            listOf(
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor1)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor2)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor3)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor4)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor5)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor6)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor7)),
-                                Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor8))
-                            )
+                            Arrangement.spacedBy(25.dp)
                         }
-
-                        categoryList.forEachIndexed { index, (category, amount) ->
-                            val percentage = if (totalForCategoryType > 0) {
-                                (amount / totalForCategoryType) * 100
+                    ) {
+                        if (categoryList.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    // Сообщение об отсутствии данных для выбранного фильтра
+                                    Text(
+                                        if (filteredOperationsByType.isEmpty()) "Нет операций за выбранный период" else "Нет ${selectedFilter.lowercase()} за выбранный период",
+                                        fontSize = 20.sp,
+                                        color = AppColors.LightColor.copy(alpha = 0.5f),
+                                    )
+                                }
+                            }
+                        } else {
+                            val totalForCategoryType = if (selectedFilter == "Доходы") {
+                                filteredOperationsByType
+                                    .filter { it.type == "Доход" }
+                                    .sumOf { it.amount }
                             } else {
-                                0.0
+                                filteredOperationsByType
+                                    .filter { it.type == "Расход" }
+                                    .sumOf { it.amount }
                             }
 
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(67.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Название категории
-                                    Text(
-                                        category,
-                                        fontSize = 24.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = AppColors.LightColor
-                                    )
+                            val gradients = if (selectedFilter == "Доходы") {
+                                listOf(
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor1)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor2)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor3)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor4)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor5)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor6)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor7)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.IncomeColor8))
+                                )
+                            } else {
+                                listOf(
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor1)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor2)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor3)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor4)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor5)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor6)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor7)),
+                                    Brush.horizontalGradient(listOf(AppColors.DarkColor, AppColors.ExpensesColor8))
+                                )
+                            }
 
-                                    Spacer(Modifier.weight(1f))
-
-                                    // Сумма
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text(
-                                            String.format("%.2f", amount),
-                                            fontSize = 24.sp,
-                                            fontWeight = FontWeight.Normal,
-                                            color = AppColors.LightColor
-                                        )
-                                        // Иконка валюты
-                                        Text(
-                                            text = "₽",
-                                            fontSize = 24.sp,
-                                            fontWeight = FontWeight.Normal,
-                                            color = AppColors.LightColor
-                                        )
-                                    }
+                            items(categoryList.size) { index ->
+                                val (category, amount) = categoryList[index]
+                                val percentage = if (totalForCategoryType > 0) {
+                                    (amount / totalForCategoryType) * 100
+                                } else {
+                                    0.0
                                 }
 
-                                Spacer(Modifier.height(8.dp))
-
-                                Box(modifier = Modifier.height(35.dp)) {
-                                    // Прогресс-бар
-                                    val normalizedPercentage = min(percentage, 100.0)
-                                    val progressWidth = normalizedPercentage / 100.0
-
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(35.dp)
-                                            .background(
-                                                AppColors.DarkColor,
-                                                shape = RoundedCornerShape(9.dp)
-                                            )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(67.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        // Градиентная часть прогресс-бара
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.CenterEnd)
-                                                .fillMaxWidth(fraction = progressWidth.toFloat())
-                                                .height(35.dp)
-                                                .background(
-                                                    gradients.getOrElse(index) { gradients.last() },
-                                                    shape = RoundedCornerShape(9.dp)
-                                                )
+                                        // Название категории
+                                        Text(
+                                            category,
+                                            fontSize = 24.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = AppColors.LightColor
                                         )
+
+                                        Spacer(Modifier.weight(1f))
+
+                                        // Сумма
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Text(
+                                                String.format("%.2f", amount),
+                                                fontSize = 24.sp,
+                                                fontWeight = FontWeight.Normal,
+                                                color = AppColors.LightColor
+                                            )
+                                            // Иконка валюты
+                                            Text(
+                                                text = "₽",
+                                                fontSize = 24.sp,
+                                                fontWeight = FontWeight.Normal,
+                                                color = AppColors.LightColor
+                                            )
+                                        }
                                     }
 
-                                    // Процент
-                                    Text(
-                                        String.format("%.2f", percentage) + " %",
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = AppColors.LightColor,
-                                        modifier = Modifier
-                                            .align(Alignment.CenterEnd)
-                                            .padding(end = 8.dp)
-                                    )
+                                    Spacer(Modifier.height(8.dp))
+
+                                    Box(modifier = Modifier.height(35.dp)) {
+                                        // Прогресс-бар
+                                        val normalizedPercentage = min(percentage, 100.0)
+                                        val progressWidth = normalizedPercentage / 100.0
+
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(35.dp)
+                                                .background(
+                                                    AppColors.DarkColor,
+                                                    shape = RoundedCornerShape(9.dp)
+                                                )
+                                        ) {
+                                            // Градиентная часть прогресс-бара
+                                            Box(
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterEnd)
+                                                    .fillMaxWidth(fraction = progressWidth.toFloat())
+                                                    .height(35.dp)
+                                                    .background(
+                                                        gradients.getOrElse(index) { gradients.last() },
+                                                        shape = RoundedCornerShape(9.dp)
+                                                    )
+                                            )
+                                        }
+
+                                        // Процент
+                                        Text(
+                                            String.format("%.2f", percentage) + " %",
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = AppColors.LightColor,
+                                            modifier = Modifier
+                                                .align(Alignment.CenterEnd)
+                                                .padding(end = 8.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -748,11 +781,6 @@ fun OverviewScreen(viewModel: FinanceViewModel) {
 
 /**
  * Фильтрует операции по временному периоду.
- *
- * @param operations Список операций
- * @param period Выбранный период ("День", "Неделя", "Месяц", "Год", "Всё время")
- * @param selectedDate Опорная дата для фильтрации
- * @return Отфильтрованный список операций
  */
 private fun filterOperationsByPeriod(
     operations: List<models.Operation>,
@@ -793,12 +821,6 @@ private fun filterOperationsByPeriod(
 
 /**
  * Фильтрует операции по типу и временному периоду.
- *
- * @param operations Список операций
- * @param filterType Тип фильтрации ("Доходы", "Расходы", "Все")
- * @param period Выбранный период
- * @param selectedDate Опорная дата для фильтрации
- * @return Отфильтрованный список операций
  */
 private fun filterOperationsByType(
     operations: List<models.Operation>,
@@ -846,17 +868,6 @@ private fun filterOperationsByType(
     }.sortedByDescending { it.date }
 }
 
-/**
- * Кнопка фильтрации по типу операций.
- *
- * @param text Текст кнопки
- * @param isSelected Активна ли кнопка
- * @param modifier Модификатор
- * @param icon Отображать ли иконку
- * @param isAll Является ли кнопка универсальной (для всех типов)
- * @param isIncome Тип для иконки (доходы/расходы)
- * @param onClick Callback при нажатии
- */
 @Composable
 private fun FilterButton(
     text: String,
@@ -918,13 +929,6 @@ private fun FilterButton(
     }
 }
 
-/**
- * Кнопка выбора временного периода.
- *
- * @param text Текст периода
- * @param isSelected Активна ли кнопка
- * @param onClick Callback при нажатии
- */
 @Composable
 private fun PeriodButton(
     text: String,
